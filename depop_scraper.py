@@ -66,22 +66,23 @@ def scrape_depop_items(keyword, gender=None, size=None, max_items=20):
         brand = None
         title = None
         if parent_li:
-            # Sale price (if any)
-            # Look for full price (discounted) and sale price
-            price_full = parent_li.find('p', class_='styles_price__H8qdh styles_discountedFullPrice__JTi1d')
-            price_discount = None
-            for p in parent_li.find_all('p', class_='styles_price__H8qdh'):
-                if 'styles_discountedFullPrice__JTi1d' not in p.get('class', []):
-                    price_discount = p
+            # Sale price (if any) using aria-labels
+            price_full = parent_li.find('p', attrs={'aria-label': 'Full price'})
+            price_discount = parent_li.find('p', attrs={'aria-label': 'Discounted price'})
+            price_regular = parent_li.find('p', attrs={'aria-label': 'Price'})
+
             if price_full and price_discount:
                 price_original = price_full.text.strip()
                 price_sale = price_discount.text.strip()
                 price = price_sale
-            else:
-                price_tag = parent_li.find('p', class_='styles_price__H8qdh')
-                price = price_tag.text.strip() if price_tag else 'N/A'
+            elif price_regular:
+                price = price_regular.text.strip()
                 price_original = None
-                price_sale = price
+                price_sale = None
+            else:
+                price = 'N/A'
+                price_original = None
+                price_sale = None
             size_tag = parent_li.find('p', class_='styles_sizeAttributeText__r9QJj')
             size = size_tag.text.strip() if size_tag else None
             brand_tag = parent_li.find_all('p')
