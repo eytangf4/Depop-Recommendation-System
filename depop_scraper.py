@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 
-def scrape_depop_items(keyword, gender=None, size=None, max_items=20):
+def scrape_depop_items(keyword, gender=None, size=None, max_items=20, offset=0):
     """
     Scrape Depop for items matching the keyword, gender, and size.
     Returns a list of item dicts: {title, price, image_url, item_url}
@@ -49,7 +49,11 @@ def scrape_depop_items(keyword, gender=None, size=None, max_items=20):
         print('[DEBUG] No listing items found. Printing HTML snippet:')
         print(html[:1000])
 
+    count = 0
     for link in listing_items:
+        if count < offset:
+            count += 1
+            continue
         item_url = 'https://www.depop.com' + link.get('href', '')
         # Get main image from main container
         main_img = link.select_one('._container_e5j9l_4 > img._mainImage_e5j9l_11')
@@ -99,6 +103,7 @@ def scrape_depop_items(keyword, gender=None, size=None, max_items=20):
             'image_url2': image_url2,
             'item_url': item_url
         })
+        count += 1
         if len(items) >= max_items:
             break
     print(f"[DEBUG] Returning {len(items)} filtered items.")

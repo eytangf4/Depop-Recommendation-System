@@ -1,7 +1,18 @@
-from flask import Flask, request, render_template, redirect, session, g
+
+from flask import Flask, request, render_template, redirect, session, g, Response, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import os
+import threading
+import time
+import queue
+import json
+from depop_scraper import scrape_depop_items
+
+app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fallback_dev_key")
+DATABASE = "users.db"
+search_progress = {}
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fallback_dev_key")
@@ -141,6 +152,17 @@ def search_progress_stream(progress_id):
             yield f"data: {json.dumps(update)}\n\n"
         del search_progress[progress_id]
     return Response(event_stream(), mimetype="text/event-stream")
+
+@app.route("/search_results_page", methods=["POST"])
+def search_results_page():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    query = data.get("query", "")
+    offset = int(data.get("offset", 0))
+    max_items = int(data.get("max_items", 10))
+    items = scrape_depop_items(query, max_items=max_items, offset=offset)
+    return jsonify({"items": items})
 
 # --- Feedback Route (placeholder, not storing yet) ---
 @app.route("/feedback", methods=["POST"])
