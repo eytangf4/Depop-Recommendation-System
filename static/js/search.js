@@ -1,15 +1,14 @@
 const form = document.getElementById('searchForm');
-const loadingBarContainer = document.getElementById('loadingBarContainer');
-const loadingBar = document.getElementById('loadingBar');
-const loadingText = document.getElementById('loadingText');
 const resultsContainer = document.getElementById('resultsContainer');
 form.addEventListener('submit', function(e) {
     e.preventDefault();
     const query = document.getElementById('queryInput').value;
     resultsContainer.innerHTML = '';
-    loadingBarContainer.style.display = 'block';
-    loadingBar.style.width = '0%';
-    loadingText.innerText = 'Loading results...';
+    loadedItems = 0;
+    allLoaded = false;
+    currentQuery = query;
+    loadedItemUrls = new Set();
+    showSpinner();
     fetch('/search_results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -17,34 +16,53 @@ form.addEventListener('submit', function(e) {
     })
     .then(res => res.json())
     .then(data => {
-        const progressId = data.progress_id;
-        const evtSource = new EventSource(`/search_progress/${progressId}`);
-        evtSource.onmessage = function(event) {
-            const update = JSON.parse(event.data);
-            loadingBar.style.width = update.progress + '%';
-            loadingText.innerText = update.status;
-            if (update.progress >= 100) {
-                evtSource.close();
-                loadingBarContainer.style.display = 'none';
-                if (update.items) {
-                    renderResults(update.items);
+        hideSpinner();
+        if (data.items) {
+            renderResults(data.items);
+            // If not enough items to fill viewport, trigger loadMoreItems
+            setTimeout(() => {
+                const grid = document.querySelector('.results-grid');
+                if (grid && grid.getBoundingClientRect().bottom < window.innerHeight && !allLoaded) {
+                    loadMoreItems();
                 }
-            }
-        };
+            }, 100);
+        }
     });
 });
 
 function renderResults(items) {
     if (!items.length) {
         resultsContainer.innerHTML = '<div class="text-center">No results found.</div>';
+        allLoaded = true;
         return;
     }
     resultsContainer.innerHTML = '';
     loadedItems = 0;
     allLoaded = false;
     currentQuery = document.getElementById('queryInput').value;
-    appendResults(items);
-    loadedItems += items.length;
+    // Filter out duplicates
+    const newItems = items.filter(item => {
+        if (loadedItemUrls.has(item.item_url)) return false;
+        loadedItemUrls.add(item.item_url);
+        return true;
+    });
+    appendResults(newItems);
+    loadedItems += newItems.length;
+    // Only set allLoaded if fewer than 10 items returned
+    if (newItems.length < 10) {
+        allLoaded = true;
+    }
+
+    // Keep loading more items if the page is not scrollable and not allLoaded
+    function tryLoadMoreIfNotScrollable() {
+        if (allLoaded) return;
+        const grid = document.querySelector('.results-grid');
+        if (grid && grid.getBoundingClientRect().bottom < window.innerHeight) {
+            loadMoreItems();
+            setTimeout(tryLoadMoreIfNotScrollable, 500);
+        }
+    }
+    setTimeout(tryLoadMoreIfNotScrollable, 200);
 }
 
 // --- Infinite Scroll & Spinner ---
@@ -52,6 +70,7 @@ let currentQuery = '';
 let loadedItems = 0;
 let isLoadingMore = false;
 let allLoaded = false;
+let loadedItemUrls = new Set();
 
 // --- Spinner setup (run once) ---
 (function setupSpinner() {
@@ -72,7 +91,24 @@ let allLoaded = false;
 })();
 
 function showSpinner() {
-    const spinner = document.getElementById('infiniteSpinner');
+    let spinner = document.getElementById('infiniteSpinner');
+    if (!spinner) {
+        spinner = document.createElement('div');
+        spinner.id = 'infiniteSpinner';
+        spinner.style.display = 'none';
+        spinner.style.justifyContent = 'center';
+        spinner.style.alignItems = 'center';
+        spinner.style.width = '100%';
+        spinner.innerHTML = '<div style="margin:2rem auto; display:inline-block;"><span class="spinner" style="display:inline-block;width:32px;height:32px;border:4px solid #cbd5e1;border-top:4px solid #6366f1;border-radius:50%;animation:spin 1s linear infinite;"></span></div>';
+        document.body.appendChild(spinner);
+        // Spinner animation CSS
+        if (!document.getElementById('spinnerStyle')) {
+            const style = document.createElement('style');
+            style.id = 'spinnerStyle';
+            style.innerHTML = `@keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }`;
+            document.head.appendChild(style);
+        }
+    }
     spinner.style.display = 'flex';
     // Place spinner after the grid
     const grid = document.querySelector('.results-grid');
@@ -141,33 +177,56 @@ function appendResults(items) {
 
 // Patch loadMoreItems to force repaint and use cleaned spinner logic
 async function loadMoreItems() {
-    if (isLoadingMore || allLoaded) return;
+    if (isLoadingMore || allLoaded) {
+        return;
+    }
     isLoadingMore = true;
     showSpinner();
     await new Promise(requestAnimationFrame); // Force repaint
-    const res = await fetch('/search_results_page', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: currentQuery, offset: loadedItems, max_items: 10 })
-    });
-    const data = await res.json();
-    hideSpinner();
-    if (data.items && data.items.length) {
-        appendResults(data.items);
-        loadedItems += data.items.length;
-        if (data.items.length < 10) allLoaded = true;
-    } else {
+    let finished = false;
+    try {
+        const res = await fetch('/search_results_page', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: currentQuery, offset: loadedItems, max_items: 10 })
+        });
+        if (!res.ok) throw new Error('Network response was not ok');
+        const data = await res.json();
+        hideSpinner();
+        if (data.items && data.items.length) {
+            appendResults(data.items);
+            loadedItems += data.items.length;
+            if (data.items.length < 10) {
+                allLoaded = true;
+            }
+        }
+        finished = true;
+    } catch (err) {
+        hideSpinner();
         allLoaded = true;
+        // Show error in UI
+        let grid = document.querySelector('.results-grid');
+        if (!grid) grid = resultsContainer;
+        const errDiv = document.createElement('div');
+        errDiv.style.color = 'red';
+        errDiv.style.textAlign = 'center';
+        errDiv.textContent = 'Error loading more results.';
+        grid.appendChild(errDiv);
+        finished = true;
+    } finally {
+        isLoadingMore = false;
     }
-    isLoadingMore = false;
 }
 
 window.addEventListener('scroll', () => {
-    if (allLoaded || isLoadingMore) return;
+    if (allLoaded || isLoadingMore) {
+        return;
+    }
     const scrollY = window.scrollY || window.pageYOffset;
     const viewport = window.innerHeight;
     const fullHeight = document.body.offsetHeight;
     if (scrollY + viewport > fullHeight - 300) {
+        showSpinner(); // Only show spinner when user reaches bottom
         loadMoreItems();
     }
 });

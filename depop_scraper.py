@@ -37,6 +37,17 @@ def scrape_depop_items(keyword, gender=None, size=None, max_items=20, offset=0):
     except Exception as e:
         print(f"[DEBUG] Timeout waiting for item cards: {e}")
 
+    # Scroll down to trigger Depop's infinite loading
+    import time
+    last_height = driver.execute_script("return document.body.scrollHeight")
+    for i in range(5):  # Scroll 5 times, adjust as needed
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(1.5)  # Wait for new items to load
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
+            break
+        last_height = new_height
+
     html = driver.page_source
     driver.quit()
 
