@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Depop Recommender | Menu{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+{% endblock %}
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="glass-card text-center">
+        <h2 class="mb-4">Welcome, {{ username }}!</h2>
+        <a href="/search" class="btn btn-primary w-100 mb-3">Search Depop</a>
+        <a href="/logout" class="btn btn-outline-secondary w-100">Logout</a>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/menu.js') }}"></script>
+{% endblock %}

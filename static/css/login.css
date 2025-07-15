@@ -1,0 +1,82 @@
+body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      color: #2d3a4b;
+    }
+    .glass-card {
+      background: rgba(255,255,255,0.7);
+      border-radius: 2rem;
+      box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 2.5rem 2rem 2rem 2rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .glass-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: #2d3a4b;
+      letter-spacing: 1px;
+    }
+    .nav-tabs {
+      border-bottom: none;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .nav-link {
+      border: none;
+      color: #64748b;
+      font-weight: 600;
+      font-size: 1.1rem;
+      background: transparent;
+      border-radius: 0.75rem 0.75rem 0 0;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-link.active {
+      color: #2563eb;
+      background: #e0e7ff;
+    }
+    .form-control {
+      border-radius: 0.75rem;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      padding: 0.7rem 1rem;
+      border: 1.5px solid #e5e7eb;
+      background: rgba(255,255,255,0.85);
+    }
+    .btn-primary {
+      background: #4f8cff;
+      border: none;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 0.7rem 0;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+    .card.card-body {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+    }
+    #auth-status {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    @media (max-width: 600px) {
+      .glass-card { padding: 1.5rem 0.5rem; }
+      .glass-title { font-size: 1.5rem; }
+    }

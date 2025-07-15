@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Depop Recommender | Search{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+{% endblock %}
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="glass-card w-100" style="max-width:900px;">
+        <form id="searchForm" autocomplete="off">
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" id="queryInput" name="query" placeholder="Search for Depop items..." required value="{{ query|default('') }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </div>
+        </form>
+        <div id="loadingBarContainer" style="display:none;">
+            <div class="progress mb-3">
+                <div id="loadingBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+            </div>
+            <div class="text-center" id="loadingText">Loading results...</div>
+        </div>
+        <div id="resultsContainer"></div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+{% endblock %}
