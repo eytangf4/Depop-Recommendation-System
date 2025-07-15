@@ -51,30 +51,51 @@ def scrape_depop_items(keyword, gender=None, size=None, max_items=20):
 
     for link in listing_items:
         item_url = 'https://www.depop.com' + link.get('href', '')
-        # Find image
-        image_tag = link.find('img', class_='_mainImage_e5j9l_11')
-        image_url = image_tag['src'] if image_tag and 'src' in image_tag.attrs else None
+        # Get main image from main container
+        main_img = link.select_one('._container_e5j9l_4 > img._mainImage_e5j9l_11')
+        image_url = main_img['src'] if main_img and 'src' in main_img.attrs else None
+        # Get hover image from hover overlay
+        hover_img = link.select_one('.styles_hoverOverlay__6Zs_i img._mainImage_e5j9l_11')
+        image_url2 = hover_img['src'] if hover_img and 'src' in hover_img.attrs else None
         # Find price and size
         parent_li = link.find_parent('li', class_='styles_listItem__Uv9lb')
         price = None
+        price_original = None
+        price_sale = None
         size = None
         brand = None
         title = None
         if parent_li:
-            price_tag = parent_li.find('p', class_='styles_price__H8qdh')
-            price = price_tag.text.strip() if price_tag else 'N/A'
+            # Sale price (if any)
+            # Look for full price (discounted) and sale price
+            price_full = parent_li.find('p', class_='styles_price__H8qdh styles_discountedFullPrice__JTi1d')
+            price_discount = None
+            for p in parent_li.find_all('p', class_='styles_price__H8qdh'):
+                if 'styles_discountedFullPrice__JTi1d' not in p.get('class', []):
+                    price_discount = p
+            if price_full and price_discount:
+                price_original = price_full.text.strip()
+                price_sale = price_discount.text.strip()
+                price = price_sale
+            else:
+                price_tag = parent_li.find('p', class_='styles_price__H8qdh')
+                price = price_tag.text.strip() if price_tag else 'N/A'
+                price_original = None
+                price_sale = price
             size_tag = parent_li.find('p', class_='styles_sizeAttributeText__r9QJj')
             size = size_tag.text.strip() if size_tag else None
             brand_tag = parent_li.find_all('p')
             if len(brand_tag) > 2:
                 brand = brand_tag[2].text.strip()
             title = brand if brand else 'No title'
-        # No filtering by gender or size
         items.append({
             'title': title,
             'price': price,
+            'price_original': price_original,
+            'price_sale': price_sale,
             'size': size,
             'image_url': image_url,
+            'image_url2': image_url2,
             'item_url': item_url
         })
         if len(items) >= max_items:
