@@ -39,7 +39,7 @@ function renderResults(items) {
         resultsContainer.innerHTML = '<div class="text-center">No results found.</div>';
         return;
     }
-    let html = '<div class="row">';
+    let html = '<div class="results-grid">';
     for (const item of items) {
         // Price display logic
         let priceHtml = '';
@@ -49,7 +49,6 @@ function renderResults(items) {
             priceHtml = `<span class="price-sale">${item.price_sale || item.price}</span>`;
         }
         html += `
-        <div class="col-md-4 mb-4">
             <div class="depop-card" data-url="${item.item_url}">
                 <div class="depop-img-wrap">
                   <img src="${item.image_url}" alt="Item image" class="item-img" data-img1="${item.image_url}" data-img2="${item.image_url2 || ''}">
@@ -66,7 +65,6 @@ function renderResults(items) {
                   </form>
                 </div>
               </div>
-        </div>
         `;
     }
     html += '</div>';
