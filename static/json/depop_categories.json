@@ -1,57 +1,1316 @@
 {
   "Men": {
-    "Tops": "menswear.tops",
-    "Bottoms": "menswear.bottoms",
-    "Coats and jackets": "menswear.coats-jackets",
-    "Suits": "menswear.suits",
-    "Footwear": "menswear.footwear",
-    "Accessories": "menswear.accessories",
-    "Nightwear": "menswear.nightwear",
-    "Underwear": "menswear.underwear",
-    "Swimwear": "menswear.swim-beach-wear",
-    "Fancy dress": "menswear.fancy-dress"
+    "Tops": [
+      {
+        "name": "T-shirts",
+        "value": "category-tshirts"
+      },
+      {
+        "name": "Hoodies",
+        "value": "category-hoodies"
+      },
+      {
+        "name": "Sweatshirts",
+        "value": "category-sweatshirts"
+      },
+      {
+        "name": "Jumpers",
+        "value": "category-jumpers"
+      },
+      {
+        "name": "Cardigans",
+        "value": "category-cardigans"
+      },
+      {
+        "name": "Shirts",
+        "value": "category-shirts"
+      },
+      {
+        "name": "Polo shirts",
+        "value": "category-polo-shirts"
+      },
+      {
+        "name": "Blouses",
+        "value": "category-blouses"
+      },
+      {
+        "name": "Crop tops",
+        "value": "category-crop-top"
+      },
+      {
+        "name": "Vests",
+        "value": "category-vests-tanks-camis"
+      },
+      {
+        "name": "Corsets",
+        "value": "category-corsets"
+      },
+      {
+        "name": "Bodysuits",
+        "value": "category-bodysuits"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-tops"
+      }
+    ],
+    "Bottoms": [
+      {
+        "name": "Jeans",
+        "value": "category-jeans"
+      },
+      {
+        "name": "Sweatpants",
+        "value": "category-joggers-tracksuits"
+      },
+      {
+        "name": "Trousers",
+        "value": "category-trousers"
+      },
+      {
+        "name": "Shorts",
+        "value": "category-shorts"
+      },
+      {
+        "name": "Leggings",
+        "value": "category-leggings"
+      },
+      {
+        "name": "Skirts",
+        "value": "category-skirts"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-bottoms"
+      }
+    ],
+    "Coats and Jackets": [
+      {
+        "name": "Coats",
+        "value": "category-coats"
+      },
+      {
+        "name": "Jackets",
+        "value": "category-jackets"
+      },
+      {
+        "name": "Gilets",
+        "value": "category-gilets"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-coats-jackets"
+      }
+    ],
+    "Jumpsuits and Playsuits": [
+      {
+        "name": "Jumpsuits",
+        "value": "category-jumpsuit"
+      },
+      {
+        "name": "Playsuits",
+        "value": "category-playsuit-romper"
+      },
+      {
+        "name": "Dungarees",
+        "value": "category-dungarees-overalls"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-jumpsuit-and-playsuit"
+      }
+    ],
+    "Suits": [
+      {
+        "name": "Suits",
+        "value": "category-suits"
+      },
+      {
+        "name": "Tailored jackets",
+        "value": "category-tailored-jackets"
+      },
+      {
+        "name": "Tailored trousers",
+        "value": "category-tailored-trousers"
+      },
+      {
+        "name": "Waistcoats",
+        "value": "category-waistcoats-vests"
+      },
+      {
+        "name": "Tuxedos",
+        "value": "category-tuxedos"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-suits"
+      }
+    ],
+    "Footwear": [
+      {
+        "name": "Trainers",
+        "value": "category-trainers"
+      },
+      {
+        "name": "Slides",
+        "value": "category-slides"
+      },
+      {
+        "name": "Sandals",
+        "value": "category-sandals"
+      },
+      {
+        "name": "Flip flops",
+        "value": "category-flipflops"
+      },
+      {
+        "name": "Slippers",
+        "value": "category-slippers"
+      },
+      {
+        "name": "Brogues",
+        "value": "category-brogues"
+      },
+      {
+        "name": "Oxfords",
+        "value": "category-oxfords"
+      },
+      {
+        "name": "Loafers",
+        "value": "category-loafers"
+      },
+      {
+        "name": "Boots",
+        "value": "category-boots"
+      },
+      {
+        "name": "Boat shoes",
+        "value": "category-boat-shoes"
+      },
+      {
+        "name": "Espadrilles",
+        "value": "category-espadrilles"
+      },
+      {
+        "name": "Ballet shoes",
+        "value": "category-ballet-shoes"
+      },
+      {
+        "name": "Clogs",
+        "value": "category-clogs"
+      },
+      {
+        "name": "Courts",
+        "value": "category-courts"
+      },
+      {
+        "name": "Mules",
+        "value": "category-mules"
+      },
+      {
+        "name": "Baby shoes",
+        "value": "category-first-shoes-baby-shoes"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-footwear"
+      }
+    ],
+    "Accessories": [
+      {
+        "name": "Bags",
+        "value": "category-bag"
+      },
+      {
+        "name": "Belts",
+        "value": "category-belt"
+      },
+      {
+        "name": "Hats and caps",
+        "value": "category-hat"
+      },
+      {
+        "name": "Gloves",
+        "value": "category-gloves"
+      },
+      {
+        "name": "Scarves and wraps",
+        "value": "category-scarf-wraps"
+      },
+      {
+        "name": "Sunglasses",
+        "value": "category-sunglasses"
+      },
+      {
+        "name": "Wallets and cardholders",
+        "value": "category-wallet-purses"
+      },
+      {
+        "name": "Jewellery",
+        "value": "category-jewellery"
+      },
+      {
+        "name": "Watches",
+        "value": "category-watch"
+      },
+      {
+        "name": "Hair accessories",
+        "value": "category-hair-accessories"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-accessories"
+      }
+    ],
+    "Nightwear": [
+      {
+        "name": "Pyjamas",
+        "value": "category-pajamas"
+      },
+      {
+        "name": "Robes",
+        "value": "category-robes"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-nightwear"
+      }
+    ],
+    "Underwear": [
+      {
+        "name": "Bandeaus",
+        "value": "category-bandeaus"
+      },
+      {
+        "name": "Bras",
+        "value": "category-bras"
+      },
+      {
+        "name": "Panties",
+        "value": "category-panties"
+      },
+      {
+        "name": "Shapewear",
+        "value": "category-shapewear"
+      },
+      {
+        "name": "Boxers and briefs",
+        "value": "category-boxers-and-briefs"
+      },
+      {
+        "name": "Vests",
+        "value": "category-vest-undershirts"
+      },
+      {
+        "name": "Socks",
+        "value": "category-socks"
+      },
+      {
+        "name": "Tights",
+        "value": "category-hosiery-tights"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-underwear"
+      }
+    ],
+    "Swimwear": [
+      {
+        "name": "Bikini and tankini sets",
+        "value": "category-bikinis-and-tankini-sets"
+      },
+      {
+        "name": "Bikini and tankini tops",
+        "value": "category-bikini-and-tankini-tops"
+      },
+      {
+        "name": "Bikini and tankini bottoms",
+        "value": "category-bikini-and-tankini-bottoms"
+      },
+      {
+        "name": "Swimsuits",
+        "value": "category-swimsuit-one-piece"
+      },
+      {
+        "name": "Swim briefs and shorts",
+        "value": "category-swim-briefs-shorts"
+      },
+      {
+        "name": "Cover ups",
+        "value": "category-cover-ups"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-swim-beach-wear"
+      }
+    ],
+    "Fancy Dress": [
+      {
+        "name": "Fancy dress",
+        "value": "category-fancy-dress"
+      }
+    ]
   },
   "Women": {
-    "Tops": "womenswear.tops",
-    "Bottoms": "womenswear.bottoms",
-    "Dresses": "womenswear.dresses",
-    "Coats and jackets": "womenswear.coats-jackets",
-    "Jumpsuits and playsuits": "womenswear.jumpsuit-and-playsuit",
-    "Suits": "womenswear.suits",
-    "Footwear": "womenswear.footwear",
-    "Accessories": "womenswear.accessories",
-    "Nightwear": "womenswear.nightwear",
-    "Underwear": "womenswear.underwear",
-    "Swimwear": "womenswear.swim-beach-wear",
-    "Fancy dress": "womenswear.fancy-dress"
+    "Tops": [
+      {
+        "name": "T-shirts",
+        "value": "category-tshirts"
+      },
+      {
+        "name": "Hoodies",
+        "value": "category-hoodies"
+      },
+      {
+        "name": "Sweatshirts",
+        "value": "category-sweatshirts"
+      },
+      {
+        "name": "Jumpers",
+        "value": "category-jumpers"
+      },
+      {
+        "name": "Cardigans",
+        "value": "category-cardigans"
+      },
+      {
+        "name": "Shirts",
+        "value": "category-shirts"
+      },
+      {
+        "name": "Polo shirts",
+        "value": "category-polo-shirts"
+      },
+      {
+        "name": "Blouses",
+        "value": "category-blouses"
+      },
+      {
+        "name": "Crop tops",
+        "value": "category-crop-top"
+      },
+      {
+        "name": "Vests",
+        "value": "category-vests-tanks-camis"
+      },
+      {
+        "name": "Corsets",
+        "value": "category-corsets"
+      },
+      {
+        "name": "Bodysuits",
+        "value": "category-bodysuits"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-tops"
+      }
+    ],
+    "Bottoms": [
+      {
+        "name": "Jeans",
+        "value": "category-jeans"
+      },
+      {
+        "name": "Sweatpants",
+        "value": "category-joggers-tracksuits"
+      },
+      {
+        "name": "Trousers",
+        "value": "category-trousers"
+      },
+      {
+        "name": "Shorts",
+        "value": "category-shorts"
+      },
+      {
+        "name": "Leggings",
+        "value": "category-leggings"
+      },
+      {
+        "name": "Skirts",
+        "value": "category-skirts"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-bottoms"
+      }
+    ],
+    "Coats and Jackets": [
+      {
+        "name": "Coats",
+        "value": "category-coats"
+      },
+      {
+        "name": "Jackets",
+        "value": "category-jackets"
+      },
+      {
+        "name": "Gilets",
+        "value": "category-gilets"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-coats-jackets"
+      }
+    ],
+    "Jumpsuits and Playsuits": [
+      {
+        "name": "Jumpsuits",
+        "value": "category-jumpsuit"
+      },
+      {
+        "name": "Playsuits",
+        "value": "category-playsuit-romper"
+      },
+      {
+        "name": "Dungarees",
+        "value": "category-dungarees-overalls"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-jumpsuit-and-playsuit"
+      }
+    ],
+    "Suits": [
+      {
+        "name": "Suits",
+        "value": "category-suits"
+      },
+      {
+        "name": "Tailored jackets",
+        "value": "category-tailored-jackets"
+      },
+      {
+        "name": "Tailored trousers",
+        "value": "category-tailored-trousers"
+      },
+      {
+        "name": "Waistcoats",
+        "value": "category-waistcoats-vests"
+      },
+      {
+        "name": "Tuxedos",
+        "value": "category-tuxedos"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-suits"
+      }
+    ],
+    "Footwear": [
+      {
+        "name": "Trainers",
+        "value": "category-trainers"
+      },
+      {
+        "name": "Slides",
+        "value": "category-slides"
+      },
+      {
+        "name": "Sandals",
+        "value": "category-sandals"
+      },
+      {
+        "name": "Flip flops",
+        "value": "category-flipflops"
+      },
+      {
+        "name": "Slippers",
+        "value": "category-slippers"
+      },
+      {
+        "name": "Brogues",
+        "value": "category-brogues"
+      },
+      {
+        "name": "Oxfords",
+        "value": "category-oxfords"
+      },
+      {
+        "name": "Loafers",
+        "value": "category-loafers"
+      },
+      {
+        "name": "Boots",
+        "value": "category-boots"
+      },
+      {
+        "name": "Boat shoes",
+        "value": "category-boat-shoes"
+      },
+      {
+        "name": "Espadrilles",
+        "value": "category-espadrilles"
+      },
+      {
+        "name": "Ballet shoes",
+        "value": "category-ballet-shoes"
+      },
+      {
+        "name": "Clogs",
+        "value": "category-clogs"
+      },
+      {
+        "name": "Courts",
+        "value": "category-courts"
+      },
+      {
+        "name": "Mules",
+        "value": "category-mules"
+      },
+      {
+        "name": "Baby shoes",
+        "value": "category-first-shoes-baby-shoes"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-footwear"
+      }
+    ],
+    "Accessories": [
+      {
+        "name": "Bags",
+        "value": "category-bag"
+      },
+      {
+        "name": "Belts",
+        "value": "category-belt"
+      },
+      {
+        "name": "Hats and caps",
+        "value": "category-hat"
+      },
+      {
+        "name": "Gloves",
+        "value": "category-gloves"
+      },
+      {
+        "name": "Scarves and wraps",
+        "value": "category-scarf-wraps"
+      },
+      {
+        "name": "Sunglasses",
+        "value": "category-sunglasses"
+      },
+      {
+        "name": "Wallets and cardholders",
+        "value": "category-wallet-purses"
+      },
+      {
+        "name": "Jewellery",
+        "value": "category-jewellery"
+      },
+      {
+        "name": "Watches",
+        "value": "category-watch"
+      },
+      {
+        "name": "Hair accessories",
+        "value": "category-hair-accessories"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-accessories"
+      }
+    ],
+    "Nightwear": [
+      {
+        "name": "Pyjamas",
+        "value": "category-pajamas"
+      },
+      {
+        "name": "Robes",
+        "value": "category-robes"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-nightwear"
+      }
+    ],
+    "Underwear": [
+      {
+        "name": "Bandeaus",
+        "value": "category-bandeaus"
+      },
+      {
+        "name": "Bras",
+        "value": "category-bras"
+      },
+      {
+        "name": "Panties",
+        "value": "category-panties"
+      },
+      {
+        "name": "Shapewear",
+        "value": "category-shapewear"
+      },
+      {
+        "name": "Boxers and briefs",
+        "value": "category-boxers-and-briefs"
+      },
+      {
+        "name": "Vests",
+        "value": "category-vest-undershirts"
+      },
+      {
+        "name": "Socks",
+        "value": "category-socks"
+      },
+      {
+        "name": "Tights",
+        "value": "category-hosiery-tights"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-underwear"
+      }
+    ],
+    "Swimwear": [
+      {
+        "name": "Bikini and tankini sets",
+        "value": "category-bikinis-and-tankini-sets"
+      },
+      {
+        "name": "Bikini and tankini tops",
+        "value": "category-bikini-and-tankini-tops"
+      },
+      {
+        "name": "Bikini and tankini bottoms",
+        "value": "category-bikini-and-tankini-bottoms"
+      },
+      {
+        "name": "Swimsuits",
+        "value": "category-swimsuit-one-piece"
+      },
+      {
+        "name": "Swim briefs and shorts",
+        "value": "category-swim-briefs-shorts"
+      },
+      {
+        "name": "Cover ups",
+        "value": "category-cover-ups"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-swim-beach-wear"
+      }
+    ],
+    "Fancy Dress": [
+      {
+        "name": "Fancy dress",
+        "value": "category-fancy-dress"
+      }
+    ],
+    "Dresses": [
+      {
+        "name": "Dresses",
+        "value": "category-dresses"
+      }
+    ]
   },
   "Kids": {
-    "Tops": "kidswear.tops",
-    "Bottoms": "kidswear.bottoms",
-    "Dresses": "kidswear.dresses",
-    "Coats and jackets": "kidswear.coats-jackets",
-    "Jumpsuits and playsuits": "kidswear.jumpsuit-and-playsuit",
-    "Suits": "kidswear.suits",
-    "Footwear": "kidswear.footwear",
-    "Accessories": "kidswear.accessories",
-    "Nightwear": "kidswear.nightwear",
-    "Swimwear": "kidswear.swim-beach-wear",
-    "Fancy dress": "kidswear.fancy-dress",
-    "Sleepsuits and bodysuits": "kidswear.sleepsuits-and-bodysuits",
-    "Clothing bundles": "kidswear.bundles"
+    "Tops": [
+      {
+        "name": "T-shirts",
+        "value": "category-tshirts"
+      },
+      {
+        "name": "Hoodies",
+        "value": "category-hoodies"
+      },
+      {
+        "name": "Sweatshirts",
+        "value": "category-sweatshirts"
+      },
+      {
+        "name": "Jumpers",
+        "value": "category-jumpers"
+      },
+      {
+        "name": "Cardigans",
+        "value": "category-cardigans"
+      },
+      {
+        "name": "Shirts",
+        "value": "category-shirts"
+      },
+      {
+        "name": "Polo shirts",
+        "value": "category-polo-shirts"
+      },
+      {
+        "name": "Blouses",
+        "value": "category-blouses"
+      },
+      {
+        "name": "Crop tops",
+        "value": "category-crop-top"
+      },
+      {
+        "name": "Vests",
+        "value": "category-vests-tanks-camis"
+      },
+      {
+        "name": "Corsets",
+        "value": "category-corsets"
+      },
+      {
+        "name": "Bodysuits",
+        "value": "category-bodysuits"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-tops"
+      }
+    ],
+    "Bottoms": [
+      {
+        "name": "Jeans",
+        "value": "category-jeans"
+      },
+      {
+        "name": "Sweatpants",
+        "value": "category-joggers-tracksuits"
+      },
+      {
+        "name": "Trousers",
+        "value": "category-trousers"
+      },
+      {
+        "name": "Shorts",
+        "value": "category-shorts"
+      },
+      {
+        "name": "Leggings",
+        "value": "category-leggings"
+      },
+      {
+        "name": "Skirts",
+        "value": "category-skirts"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-bottoms"
+      }
+    ],
+    "Coats and Jackets": [
+      {
+        "name": "Coats",
+        "value": "category-coats"
+      },
+      {
+        "name": "Jackets",
+        "value": "category-jackets"
+      },
+      {
+        "name": "Gilets",
+        "value": "category-gilets"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-coats-jackets"
+      }
+    ],
+    "Jumpsuits and Playsuits": [
+      {
+        "name": "Jumpsuits",
+        "value": "category-jumpsuit"
+      },
+      {
+        "name": "Playsuits",
+        "value": "category-playsuit-romper"
+      },
+      {
+        "name": "Dungarees",
+        "value": "category-dungarees-overalls"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-jumpsuit-and-playsuit"
+      }
+    ],
+    "Suits": [
+      {
+        "name": "Suits",
+        "value": "category-suits"
+      },
+      {
+        "name": "Tailored jackets",
+        "value": "category-tailored-jackets"
+      },
+      {
+        "name": "Tailored trousers",
+        "value": "category-tailored-trousers"
+      },
+      {
+        "name": "Waistcoats",
+        "value": "category-waistcoats-vests"
+      },
+      {
+        "name": "Tuxedos",
+        "value": "category-tuxedos"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-suits"
+      }
+    ],
+    "Footwear": [
+      {
+        "name": "Trainers",
+        "value": "category-trainers"
+      },
+      {
+        "name": "Slides",
+        "value": "category-slides"
+      },
+      {
+        "name": "Sandals",
+        "value": "category-sandals"
+      },
+      {
+        "name": "Flip flops",
+        "value": "category-flipflops"
+      },
+      {
+        "name": "Slippers",
+        "value": "category-slippers"
+      },
+      {
+        "name": "Brogues",
+        "value": "category-brogues"
+      },
+      {
+        "name": "Oxfords",
+        "value": "category-oxfords"
+      },
+      {
+        "name": "Loafers",
+        "value": "category-loafers"
+      },
+      {
+        "name": "Boots",
+        "value": "category-boots"
+      },
+      {
+        "name": "Boat shoes",
+        "value": "category-boat-shoes"
+      },
+      {
+        "name": "Espadrilles",
+        "value": "category-espadrilles"
+      },
+      {
+        "name": "Ballet shoes",
+        "value": "category-ballet-shoes"
+      },
+      {
+        "name": "Clogs",
+        "value": "category-clogs"
+      },
+      {
+        "name": "Courts",
+        "value": "category-courts"
+      },
+      {
+        "name": "Mules",
+        "value": "category-mules"
+      },
+      {
+        "name": "Baby shoes",
+        "value": "category-first-shoes-baby-shoes"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-footwear"
+      }
+    ],
+    "Accessories": [
+      {
+        "name": "Bags",
+        "value": "category-bag"
+      },
+      {
+        "name": "Belts",
+        "value": "category-belt"
+      },
+      {
+        "name": "Hats and caps",
+        "value": "category-hat"
+      },
+      {
+        "name": "Gloves",
+        "value": "category-gloves"
+      },
+      {
+        "name": "Scarves and wraps",
+        "value": "category-scarf-wraps"
+      },
+      {
+        "name": "Sunglasses",
+        "value": "category-sunglasses"
+      },
+      {
+        "name": "Wallets and cardholders",
+        "value": "category-wallet-purses"
+      },
+      {
+        "name": "Jewellery",
+        "value": "category-jewellery"
+      },
+      {
+        "name": "Watches",
+        "value": "category-watch"
+      },
+      {
+        "name": "Hair accessories",
+        "value": "category-hair-accessories"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-accessories"
+      }
+    ],
+    "Nightwear": [
+      {
+        "name": "Pyjamas",
+        "value": "category-pajamas"
+      },
+      {
+        "name": "Robes",
+        "value": "category-robes"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-nightwear"
+      }
+    ],
+    "Underwear": [
+      {
+        "name": "Bandeaus",
+        "value": "category-bandeaus"
+      },
+      {
+        "name": "Bras",
+        "value": "category-bras"
+      },
+      {
+        "name": "Panties",
+        "value": "category-panties"
+      },
+      {
+        "name": "Shapewear",
+        "value": "category-shapewear"
+      },
+      {
+        "name": "Boxers and briefs",
+        "value": "category-boxers-and-briefs"
+      },
+      {
+        "name": "Vests",
+        "value": "category-vest-undershirts"
+      },
+      {
+        "name": "Socks",
+        "value": "category-socks"
+      },
+      {
+        "name": "Tights",
+        "value": "category-hosiery-tights"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-underwear"
+      }
+    ],
+    "Swimwear": [
+      {
+        "name": "Bikini and tankini sets",
+        "value": "category-bikinis-and-tankini-sets"
+      },
+      {
+        "name": "Bikini and tankini tops",
+        "value": "category-bikini-and-tankini-tops"
+      },
+      {
+        "name": "Bikini and tankini bottoms",
+        "value": "category-bikini-and-tankini-bottoms"
+      },
+      {
+        "name": "Swimsuits",
+        "value": "category-swimsuit-one-piece"
+      },
+      {
+        "name": "Swim briefs and shorts",
+        "value": "category-swim-briefs-shorts"
+      },
+      {
+        "name": "Cover ups",
+        "value": "category-cover-ups"
+      },
+      {
+        "name": "Other",
+        "value": "category-other-swim-beach-wear"
+      }
+    ],
+    "Fancy Dress": [
+      {
+        "name": "Fancy dress",
+        "value": "category-fancy-dress"
+      }
+    ],
+    "Dresses": [
+      {
+        "name": "Dresses",
+        "value": "category-dresses"
+      }
+    ],
+    "Sleepsuits and Bodysuits": [
+      {
+        "name": "Sleepsuits and bodysuits",
+        "value": "category-sleepsuits-babygrows"
+      }
+    ],
+    "Clothing Bundles": [
+      {
+        "name": "Clothing bundles",
+        "value": "category-bundles"
+      }
+    ]
   },
-  "Everything else": {
-    "Beauty": "everything-else.beauty",
-    "Face masks and coverings": "everything-else.face-masks",
-    "Home": "everything-else.home",
-    "Tech accessories": "everything-else.tech-accessories",
-    "Cameras and film": "everything-else.film",
-    "Art": "everything-else.art",
-    "Books and magazines": "everything-else.books-and-magazine",
-    "Music": "everything-else.music",
-    "Party supplies": "everything-else.party-supplies",
-    "Sports equipment": "everything-else.sports-equipment-accesories",
-    "Toys": "everything-else.toys",
-    "Umbrellas": "everything-else.umbrella"
+  "Everything Else": {
+    "Beauty": [
+      {
+        "name": "Bath and body",
+        "value": "category-bath-and-body"
+      },
+      {
+        "name": "Fragrance",
+        "value": "category-fragrance"
+      },
+      {
+        "name": "Haircare",
+        "value": "category-hair-products"
+      },
+      {
+        "name": "Makeup",
+        "value": "category-makeup"
+      },
+      {
+        "name": "Nails",
+        "value": "category-nails"
+      },
+      {
+        "name": "Grooming",
+        "value": "category-grooming"
+      },
+      {
+        "name": "Skincare",
+        "value": "category-skincare"
+      },
+      {
+        "name": "Tools and brushes",
+        "value": "category-tools-and-brushes"
+      }
+    ],
+    "Face Masks and Coverings": [
+      {
+        "name": "Face masks and coverings",
+        "value": "category-face-masks"
+      }
+    ],
+    "Home": [
+      {
+        "name": "Dinnerware",
+        "value": "category-dinnerware"
+      },
+      {
+        "name": "Furniture",
+        "value": "category-furniture"
+      },
+      {
+        "name": "Home accessories",
+        "value": "category-decor-home-accesories"
+      },
+      {
+        "name": "Soft furnishings and textiles",
+        "value": "category-soft-furnishings-textiles"
+      },
+      {
+        "name": "Storage and organisation",
+        "value": "category-storage-and-organisation"
+      }
+    ],
+    "Tech Accessories": [
+      {
+        "name": "Laptop bags and cases",
+        "value": "category-laptop-cases-bag"
+      },
+      {
+        "name": "Phone cases",
+        "value": "category-phone-cases"
+      }
+    ],
+    "Cameras and Film": [
+      {
+        "name": "Cameras and film",
+        "value": "category-cameras-and-accessories"
+      }
+    ],
+    "Art": [
+      {
+        "name": "Collectibles",
+        "value": "category-collectibles"
+      },
+      {
+        "name": "Drawings and illustrations",
+        "value": "category-drawing-and-illustrations"
+      },
+      {
+        "name": "Mixed media",
+        "value": "category-mixed-media"
+      },
+      {
+        "name": "Paintings",
+        "value": "category-paintings"
+      },
+      {
+        "name": "Photography",
+        "value": "category-photography"
+      },
+      {
+        "name": "Prints",
+        "value": "category-prints"
+      },
+      {
+        "name": "Sculptures",
+        "value": "category-sculptures"
+      },
+      {
+        "name": "Stickers",
+        "value": "category-stickers"
+      }
+    ],
+    "Books and Magazines": [
+      {
+        "name": "Books",
+        "value": "category-books"
+      },
+      {
+        "name": "Magazines",
+        "value": "category-magazines"
+      }
+    ],
+    "Music": [
+      {
+        "name": "CDs and vinyl",
+        "value": "category-cds-and-vinyl"
+      },
+      {
+        "name": "Musical instruments",
+        "value": "category-musical-instruments-and-dj"
+      }
+    ],
+    "Party Supplies": [
+      {
+        "name": "Cake decorating",
+        "value": "category-cake-decor"
+      },
+      {
+        "name": "Cards, invitations, gift wrap",
+        "value": "category-cards-invitations-gift-wrap"
+      },
+      {
+        "name": "Decorations",
+        "value": "category-decorations"
+      },
+      {
+        "name": "Party favours",
+        "value": "category-favours"
+      },
+      {
+        "name": "Party hats",
+        "value": "category-party-hats"
+      }
+    ],
+    "Sports Equipment": [
+      {
+        "name": "Ball sports",
+        "value": "category-ball-sports"
+      },
+      {
+        "name": "Camping and hiking",
+        "value": "category-camping-hiking"
+      },
+      {
+        "name": "Cycling",
+        "value": "category-cycling"
+      },
+      {
+        "name": "Fitness",
+        "value": "category-fitness"
+      },
+      {
+        "name": "Golf",
+        "value": "category-golf"
+      },
+      {
+        "name": "Skates, skateboards and scooters",
+        "value": "category-skates-skateboards-scooters"
+      },
+      {
+        "name": "Racquet sports",
+        "value": "category-raquet-sports"
+      },
+      {
+        "name": "Water sports",
+        "value": "category-water-sports"
+      },
+      {
+        "name": "Winter sports",
+        "value": "category-winter-sports"
+      }
+    ],
+    "Toys": [
+      {
+        "name": "Action figures and playsets",
+        "value": "category-action-figures-playsets"
+      },
+      {
+        "name": "Building sets and blocks",
+        "value": "category-building-sets-blocks"
+      },
+      {
+        "name": "Cars and vehicles",
+        "value": "category-cars-vehicles"
+      },
+      {
+        "name": "Dolls and accessories",
+        "value": "category-dolls-accessories"
+      },
+      {
+        "name": "Learning toys",
+        "value": "category-learning-toys"
+      },
+      {
+        "name": "Puzzles and games",
+        "value": "category-puzzles-games"
+      },
+      {
+        "name": "Stuffed animals",
+        "value": "category-stuffed-animals"
+      },
+      {
+        "name": "Trading cards",
+        "value": "category-trading-cards"
+      }
+    ],
+    "Umbrellas": [
+      {
+        "name": "Umbrellas",
+        "value": "category-umbrella"
+      }
+    ]
   }
 }
