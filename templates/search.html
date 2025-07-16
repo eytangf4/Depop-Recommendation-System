@@ -15,6 +15,44 @@
                     <button type="submit" class="btn btn-primary w-100">Search</button>
                 </div>
             </div>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <select class="form-control" id="groupInput" name="group">
+                        <option value="">Category</option>
+                        <option value="tops">Tops</option>
+                        <option value="bottoms">Bottoms</option>
+                        <option value="footwear">Footwear</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="everything_else">Everything Else</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control" id="genderInput" name="gender">
+                        <option value="">Gender</option>
+                        <option value="male">Men</option>
+                        <option value="female">Women</option>
+                        <option value="kids">Kids</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="brandInput" name="brand" placeholder="Brand">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="sizeInput" name="size" placeholder="Size">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="colorInput" name="color" placeholder="Color">
+                </div>
+                <div class="col-md-1">
+                    <input type="number" class="form-control" id="priceMinInput" name="price_min" placeholder="Min $">
+                </div>
+                <div class="col-md-1">
+                    <input type="number" class="form-control" id="priceMaxInput" name="price_max" placeholder="Max $">
+                </div>
+                <div class="col-md-1 d-flex align-items-center">
+                    <input type="checkbox" id="onSaleInput" name="on_sale" style="margin-right:5px;"> <label for="onSaleInput">On Sale</label>
+                </div>
+            </div>
         </form>
         <div id="loadingBarContainer" style="display:none;">
             <div class="progress mb-3">

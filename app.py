@@ -1,14 +1,9 @@
-
 from flask import Flask, request, render_template, redirect, session, g, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import os
 import json
-from depop_scraper import scrape_depop_items
-
-app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fallback_dev_key")
-DATABASE = "users.db"
+from depop_api import fetch_depop_items
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fallback_dev_key")
@@ -97,7 +92,7 @@ import time
 import queue
 import json
 from flask import Response, jsonify
-from depop_scraper import scrape_depop_items
+from depop_api import fetch_depop_items
 
 
 # --- Streaming progress for search ---
@@ -116,8 +111,18 @@ def search_results():
         return jsonify({"error": "Unauthorized"}), 401
     data = request.get_json()
     query = data.get("query", "")
-    items = scrape_depop_items(query, max_items=10)
-    return jsonify({"items": items})
+    filters = {
+        "group": data.get("group"),
+        "gender": data.get("gender"),
+        "brand": data.get("brand"),
+        "size": data.get("size"),
+        "color": data.get("color"),
+        "price_min": data.get("price_min"),
+        "price_max": data.get("price_max"),
+        "on_sale": data.get("on_sale")
+    }
+    items, next_cursor = fetch_depop_items(query, **filters, max_items=24)
+    return jsonify({"items": items, "next_cursor": next_cursor})
 
 @app.route("/search_results_page", methods=["POST"])
 def search_results_page():
@@ -125,10 +130,19 @@ def search_results_page():
         return jsonify({"error": "Unauthorized"}), 401
     data = request.get_json()
     query = data.get("query", "")
-    offset = int(data.get("offset", 0))
-    max_items = int(data.get("max_items", 10))
-    items = scrape_depop_items(query, max_items=max_items, offset=offset)
-    return jsonify({"items": items})
+    cursor = data.get("cursor")
+    filters = {
+        "group": data.get("group"),
+        "gender": data.get("gender"),
+        "brand": data.get("brand"),
+        "size": data.get("size"),
+        "color": data.get("color"),
+        "price_min": data.get("price_min"),
+        "price_max": data.get("price_max"),
+        "on_sale": data.get("on_sale")
+    }
+    items, next_cursor = fetch_depop_items(query, **filters, max_items=24, offset=cursor)
+    return jsonify({"items": items, "next_cursor": next_cursor})
 
 # --- Feedback Route (placeholder, not storing yet) ---
 @app.route("/feedback", methods=["POST"])

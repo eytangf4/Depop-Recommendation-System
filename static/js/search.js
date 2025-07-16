@@ -3,67 +3,60 @@ const resultsContainer = document.getElementById('resultsContainer');
 form.addEventListener('submit', function(e) {
     e.preventDefault();
     const query = document.getElementById('queryInput').value;
+    const group = document.getElementById('groupInput').value;
+    const gender = document.getElementById('genderInput').value;
+    const brand = document.getElementById('brandInput').value;
+    const size = document.getElementById('sizeInput').value;
+    const color = document.getElementById('colorInput').value;
+    const price_min = document.getElementById('priceMinInput').value;
+    const price_max = document.getElementById('priceMaxInput').value;
+    const on_sale = document.getElementById('onSaleInput').checked;
+
     resultsContainer.innerHTML = '';
     loadedItems = 0;
     allLoaded = false;
     currentQuery = query;
     loadedItemUrls = new Set();
+    // Store filters and reset cursor for pagination
+    window.currentFilters = {
+        query,
+        group,
+        gender,
+        brand,
+        size,
+        color,
+        price_min,
+        price_max,
+        on_sale
+    };
+    window.currentCursor = null;
     showSpinner();
     fetch('/search_results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
+        body: JSON.stringify(window.currentFilters)
     })
     .then(res => res.json())
     .then(data => {
         hideSpinner();
         if (data.items) {
-            renderResults(data.items);
-            // If not enough items to fill viewport, trigger loadMoreItems
-            setTimeout(() => {
-                const grid = document.querySelector('.results-grid');
-                if (grid && grid.getBoundingClientRect().bottom < window.innerHeight && !allLoaded) {
-                    loadMoreItems();
-                }
-            }, 100);
+            resultsContainer.innerHTML = '';
+            loadedItemUrls = new Set();
+            loadedItems = 0;
+            allLoaded = false;
+            appendResults(data.items);
+            loadedItems += data.items.length;
+            window.currentCursor = data.next_cursor || null;
+            if (!window.currentCursor || !data.items.length) allLoaded = true;
+            // Immediately try to load more if cursor is set and not allLoaded
+            if (window.currentCursor && !allLoaded) {
+                loadMoreItems();
+            }
         }
     });
 });
 
-function renderResults(items) {
-    if (!items.length) {
-        resultsContainer.innerHTML = '<div class="text-center">No results found.</div>';
-        allLoaded = true;
-        return;
-    }
-    resultsContainer.innerHTML = '';
-    loadedItems = 0;
-    allLoaded = false;
-    currentQuery = document.getElementById('queryInput').value;
-    // Filter out duplicates
-    const newItems = items.filter(item => {
-        if (loadedItemUrls.has(item.item_url)) return false;
-        loadedItemUrls.add(item.item_url);
-        return true;
-    });
-    appendResults(newItems);
-    loadedItems += newItems.length;
-    // Only set allLoaded if fewer than 10 items returned
-    if (newItems.length < 10) {
-        allLoaded = true;
-    }
-
-    // Keep loading more items if the page is not scrollable and not allLoaded
-    function tryLoadMoreIfNotScrollable() {
-        if (allLoaded) return;
-        const grid = document.querySelector('.results-grid');
-        if (grid && grid.getBoundingClientRect().bottom < window.innerHeight) {
-            loadMoreItems();
-            setTimeout(tryLoadMoreIfNotScrollable, 500);
-        }
-    }
-    setTimeout(tryLoadMoreIfNotScrollable, 200);
-}
+// renderResults is now unused; all rendering is handled in appendResults for infinite scroll
 
 // --- Infinite Scroll & Spinner ---
 let currentQuery = '';
@@ -132,10 +125,10 @@ function appendResults(items) {
     }
     for (const item of items) {
         let priceHtml = '';
-        if (item.price_original && item.price_original !== item.price_sale) {
-            priceHtml = `<span class="price-original">${item.price_original}</span> <span class="price-sale">${item.price_sale}</span>`;
+        if (item.price_original && item.price_sale && item.price_original !== item.price_sale) {
+            priceHtml = `<span class="price-original" style="text-decoration:line-through;color:#888;margin-right:0.5em;">$${item.price_original}</span> <span class="price-sale" style="color:#222;font-weight:600;">$${item.price_sale}</span>`;
         } else {
-            priceHtml = `<span class="price-sale">${item.price_sale || item.price}</span>`;
+            priceHtml = `<span class="price-sale" style="color:#222;font-weight:600;">$${item.price_sale || item.price}</span>`;
         }
         const card = document.createElement('div');
         card.className = 'depop-card';
@@ -161,14 +154,15 @@ function appendResults(items) {
     // Re-attach handlers
     document.querySelectorAll('.depop-card').forEach(card => {
         card.addEventListener('click', function(e) {
-            if (e.target.closest('button')) return;
-            window.open(this.getAttribute('data-url'), '_blank');
+            if (e.target.closest('button') || e.target.closest('form')) return;
+            const url = this.getAttribute('data-url');
+            if (url) window.open(url, '_blank');
         });
     });
     document.querySelectorAll('.item-img').forEach(img => {
         const img1 = img.getAttribute('data-img1');
         const img2 = img.getAttribute('data-img2');
-        if (img2) {
+        if (img2 && img2 !== '') {
             img.addEventListener('mouseenter', () => { img.src = img2; });
             img.addEventListener('mouseleave', () => { img.src = img1; });
         }
@@ -182,13 +176,18 @@ async function loadMoreItems() {
     }
     isLoadingMore = true;
     showSpinner();
-    await new Promise(requestAnimationFrame); // Force repaint
-    let finished = false;
     try {
+        const filters = window.currentFilters || {};
+        const cursor = window.currentCursor;
+        console.log('[DEBUG] loadMoreItems called. Cursor:', cursor);
         const res = await fetch('/search_results_page', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: currentQuery, offset: loadedItems, max_items: 10 })
+            body: JSON.stringify({
+                ...filters,
+                cursor: cursor,
+                max_items: 24
+            })
         });
         if (!res.ok) throw new Error('Network response was not ok');
         const data = await res.json();
@@ -196,11 +195,12 @@ async function loadMoreItems() {
         if (data.items && data.items.length) {
             appendResults(data.items);
             loadedItems += data.items.length;
-            if (data.items.length < 10) {
-                allLoaded = true;
-            }
+            window.currentCursor = data.next_cursor || null;
+            console.log('[DEBUG] New cursor after load:', window.currentCursor);
+            if (!window.currentCursor) allLoaded = true;
+        } else {
+            allLoaded = true;
         }
-        finished = true;
     } catch (err) {
         hideSpinner();
         allLoaded = true;
@@ -212,7 +212,6 @@ async function loadMoreItems() {
         errDiv.style.textAlign = 'center';
         errDiv.textContent = 'Error loading more results.';
         grid.appendChild(errDiv);
-        finished = true;
     } finally {
         isLoadingMore = false;
     }
@@ -226,7 +225,7 @@ window.addEventListener('scroll', () => {
     const viewport = window.innerHeight;
     const fullHeight = document.body.offsetHeight;
     if (scrollY + viewport > fullHeight - 300) {
-        showSpinner(); // Only show spinner when user reaches bottom
+        showSpinner();
         loadMoreItems();
     }
 });

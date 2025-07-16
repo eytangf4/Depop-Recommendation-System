@@ -1,0 +1,57 @@
+{
+  "Men": {
+    "Tops": "menswear.tops",
+    "Bottoms": "menswear.bottoms",
+    "Coats and jackets": "menswear.coats-jackets",
+    "Suits": "menswear.suits",
+    "Footwear": "menswear.footwear",
+    "Accessories": "menswear.accessories",
+    "Nightwear": "menswear.nightwear",
+    "Underwear": "menswear.underwear",
+    "Swimwear": "menswear.swim-beach-wear",
+    "Fancy dress": "menswear.fancy-dress"
+  },
+  "Women": {
+    "Tops": "womenswear.tops",
+    "Bottoms": "womenswear.bottoms",
+    "Dresses": "womenswear.dresses",
+    "Coats and jackets": "womenswear.coats-jackets",
+    "Jumpsuits and playsuits": "womenswear.jumpsuit-and-playsuit",
+    "Suits": "womenswear.suits",
+    "Footwear": "womenswear.footwear",
+    "Accessories": "womenswear.accessories",
+    "Nightwear": "womenswear.nightwear",
+    "Underwear": "womenswear.underwear",
+    "Swimwear": "womenswear.swim-beach-wear",
+    "Fancy dress": "womenswear.fancy-dress"
+  },
+  "Kids": {
+    "Tops": "kidswear.tops",
+    "Bottoms": "kidswear.bottoms",
+    "Dresses": "kidswear.dresses",
+    "Coats and jackets": "kidswear.coats-jackets",
+    "Jumpsuits and playsuits": "kidswear.jumpsuit-and-playsuit",
+    "Suits": "kidswear.suits",
+    "Footwear": "kidswear.footwear",
+    "Accessories": "kidswear.accessories",
+    "Nightwear": "kidswear.nightwear",
+    "Swimwear": "kidswear.swim-beach-wear",
+    "Fancy dress": "kidswear.fancy-dress",
+    "Sleepsuits and bodysuits": "kidswear.sleepsuits-and-bodysuits",
+    "Clothing bundles": "kidswear.bundles"
+  },
+  "Everything else": {
+    "Beauty": "everything-else.beauty",
+    "Face masks and coverings": "everything-else.face-masks",
+    "Home": "everything-else.home",
+    "Tech accessories": "everything-else.tech-accessories",
+    "Cameras and film": "everything-else.film",
+    "Art": "everything-else.art",
+    "Books and magazines": "everything-else.books-and-magazine",
+    "Music": "everything-else.music",
+    "Party supplies": "everything-else.party-supplies",
+    "Sports equipment": "everything-else.sports-equipment-accesories",
+    "Toys": "everything-else.toys",
+    "Umbrellas": "everything-else.umbrella"
+  }
+}

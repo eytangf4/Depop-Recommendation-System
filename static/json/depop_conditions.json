@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Brand new",
+    "description": "Unused with original packaging or tags",
+    "value": "brand_new"
+  },
+  {
+    "name": "Like new",
+    "description": "Mint condition pre-owned or new without tags",
+    "value": "used_like_new"
+  },
+  {
+    "name": "Used - Excellent",
+    "description": "Lightly used but no noticeable flaws",
+    "value": "used_excellent"
+  },
+  {
+    "name": "Used - Good",
+    "description": "Minor flaws or signs of wear, to be noted in the description or photos",
+    "value": "used_good"
+  },
+  {
+    "name": "Used - Fair",
+    "description": "Obvious flaws or signs of wear, to be noted in the description or photos",
+    "value": "used_fair"
+  }
+]

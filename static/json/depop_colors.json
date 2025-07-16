@@ -1,0 +1,34 @@
+[
+  { "name": "Black", "hex": "#000000" },
+  { "name": "Grey", "hex": "#DCDCDC" },
+  { "name": "White", "hex": "#FFFFFF", "border": "#FFFFFF" },
+  { "name": "Brown", "hex": "#5E3F32" },
+  { "name": "Tan", "hex": "#F0BB7F" },
+  { "name": "Cream", "hex": "#F1E6B2" },
+  { "name": "Yellow", "hex": "#FBE122" },
+  { "name": "Red", "hex": "#E10600" },
+  { "name": "Burgundy", "hex": "#8A2B2B" },
+  { "name": "Orange", "hex": "#FA6400" },
+  { "name": "Pink", "hex": "#F564B3" },
+  { "name": "Purple", "hex": "#5F18D1" },
+  { "name": "Blue", "hex": "#046AB7" },
+  { "name": "Navy", "hex": "#002555" },
+  { "name": "Green", "hex": "#5EAF07" },
+  { "name": "Khaki", "hex": "#8D7F1F" },
+  {
+    "name": "Multi",
+    "hex": "#FFFFFF",
+    "border": "#FFFFFF",
+    "gradient": "conic-gradient(from 0.25turn, #e02020, #fa6400 0.17turn, #f7b500 0.33turn, #6dd400 0.5turn, #0091ff 0.67turn, #6236ff 0.83turn, #ae22e3 0.96turn, #b620e0)"
+  },
+  {
+    "name": "Silver",
+    "hex": "#CDCDCD",
+    "gradient": "linear-gradient(254deg, #d5d5d5, #7c7c7c)"
+  },
+  {
+    "name": "Gold",
+    "hex": "#D6C478",
+    "gradient": "linear-gradient(253deg, #dccd8f, #bc9700)"
+  }
+]
