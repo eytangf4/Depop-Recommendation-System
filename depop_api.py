@@ -135,6 +135,12 @@ def fetch_depop_items(query, gender=None, category=None, subcategory=None, brand
         response.raise_for_status()
         data = response.json()
         products = data.get("products", [])
+        
+        # Debug: Show how many products were returned
+        print(f"DEBUG - Depop returned {len(products)} products")
+        if size:
+            print(f"DEBUG - Size filter was applied: {size}")
+        
         # Get next_cursor from meta
         next_cursor = data.get("meta", {}).get("cursor")
         items = []
@@ -155,14 +161,20 @@ def fetch_depop_items(query, gender=None, category=None, subcategory=None, brand
             if len(pictures) > 1:
                 image_url2 = pictures[1].get("640") or pictures[1].get("480") or pictures[1].get("320") or ""
             sizes = product.get("sizes", [])
-            size = sizes[0] if sizes else None
+            size_display = sizes[0] if sizes else None
+            
+            # Debug: Print all sizes for items when size filter is applied
+            if size:
+                print(f"DEBUG - Item '{title[:20]}...' all sizes: {sizes}, showing: {size_display}")
+            
             item_url = f"https://www.depop.com/products/{slug}/"
             item = {
                 "title": title,
                 "price": price,
                 "price_original": price_original,
                 "price_sale": price_sale if price_sale else price_original,
-                "size": size,
+                "size": size_display,
+                "all_sizes": sizes,  # Include all available sizes
                 "brand": brand,
                 "image_url": image_url,
                 "image_url2": image_url2,

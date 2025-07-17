@@ -162,10 +162,24 @@ class SearchManager {
         .then(response => response.json())
         .then(data => {
             if (data.items) {
+                // Apply client-side size filtering if size filters are selected
+                let filteredItems = data.items;
+                if (window.depopFilters && window.depopFilters.selectedSizes.size > 0) {
+                    const selectedSizes = Array.from(window.depopFilters.selectedSizes);
+                    filteredItems = data.items.filter(item => {
+                        // Check if item has any of the selected sizes
+                        const itemSizes = item.all_sizes || [item.size];
+                        return selectedSizes.some(selectedSize => 
+                            itemSizes.includes(selectedSize)
+                        );
+                    });
+                    console.log(`DEBUG - Size filtering: ${data.items.length} items -> ${filteredItems.length} items after filtering for sizes: ${selectedSizes.join(', ')}`);
+                }
+
                 if (loadMore) {
-                    this.appendResults(data.items);
+                    this.appendResults(filteredItems);
                 } else {
-                    this.displayResults(data.items);
+                    this.displayResults(filteredItems);
                 }
                 this.nextCursor = data.next_cursor;
                 this.hasMoreResults = !!data.next_cursor && data.items.length > 0;
@@ -266,13 +280,21 @@ class SearchManager {
             priceHtml = `<span class="price-sale" style="color:#222;font-weight:600;">$${item.price_sale || item.price}</span>`;
         }
 
+        // Handle size display - show all available sizes if multiple, or just the main size
+        let sizeHtml = '';
+        if (item.all_sizes && item.all_sizes.length > 1) {
+            sizeHtml = `Size: ${item.all_sizes.join(', ')}`;
+        } else if (item.size) {
+            sizeHtml = `Size: ${item.size}`;
+        }
+
         card.innerHTML = `
             <div class="depop-img-wrap">
                 <img src="${item.image_url}" alt="Item image" class="item-img" data-img1="${item.image_url}" data-img2="${item.image_url2 || ''}">
             </div>
             <div class="depop-info">
                 <div class="depop-price">${priceHtml}</div>
-                <div class="depop-size">${item.size ? 'Size: ' + item.size : ''}</div>
+                <div class="depop-size">${sizeHtml}</div>
             </div>
             <div class="depop-actions">
                 <form method="post" action="/feedback" class="feedback-form">

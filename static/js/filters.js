@@ -308,33 +308,258 @@ class DepopFilters {
         const sizeList = document.getElementById('sizeList');
         if (!sizeList) return;
 
-        this.selectedSizes.clear();
         sizeList.innerHTML = '';
 
-        // Use standard sizes that work with Depop API
-        let sizes = [];
+        // Size structure based on Depop's hierarchical system
+        const sizeStructure = {
+            menswear: {
+                tops: {
+                    uk: ['One size', '3XS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', 'Other'],
+                    us: ['One size', '3XS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', 'Other'],
+                    eur: ['One size', '3XS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', 'Other']
+                },
+                bottoms: {
+                    uk: ['26', '28', '30', '32', '34', '36', '38', '40', '42', '44', 'Other'],
+                    us: ['26', '28', '30', '32', '34', '36', '38', '40', '42', '44', 'Other'],
+                    eur: ['42', '44', '46', '48', '50', '52', '54', '56', '58', '60', 'Other']
+                },
+                shoes: {
+                    uk: ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Other'],
+                    us: ['4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', 'Other'],
+                    eur: ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', 'Other']
+                },
+                underwear: {
+                    uk: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Other'],
+                    us: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Other'],
+                    eur: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Other']
+                },
+                outerwear: {
+                    uk: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', 'Other'],
+                    us: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', 'Other'],
+                    eur: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', 'Other']
+                }
+            },
+            womenswear: {
+                tops: {
+                    uk: ['One size', '3XS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', 'Other'],
+                    us: ['One size', '3XS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', 'Other'],
+                    eur: ['One size', '3XS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', 'Other']
+                },
+                bottoms: {
+                    uk: ['4', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24', 'Other'],
+                    us: ['0', '2', '4', '6', '8', '10', '12', '14', '16', '18', '20', 'Other'],
+                    eur: ['32', '34', '36', '38', '40', '42', '44', '46', '48', '50', '52', 'Other']
+                },
+                shoes: {
+                    uk: ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', 'Other'],
+                    us: ['4', '5', '6', '7', '8', '9', '10', '11', '12', '13', 'Other'],
+                    eur: ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', 'Other']
+                },
+                underwear: {
+                    uk: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Other'],
+                    us: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Other'],
+                    eur: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Other']
+                },
+                outerwear: {
+                    uk: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Other'],
+                    us: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Other'],
+                    eur: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Other']
+                }
+            },
+            kids: {
+                tops: {
+                    uk: ['1-2 years', '2-3 years', '3-4 years', '4-5 years', '5-6 years', '6-7 years', '7-8 years', '8-9 years', '9-10 years', '10-11 years', '11-12 years', '12-13 years', '13-14 years', '14-15 years', '15-16 years', 'Other'],
+                    us: ['2T', '3T', '4T', '5T', '6', '7', '8', '10', '12', '14', '16', 'Other'],
+                    eur: ['86', '92', '98', '104', '110', '116', '122', '128', '134', '140', '146', '152', '158', '164', '170', 'Other']
+                },
+                bottoms: {
+                    uk: ['1-2 years', '2-3 years', '3-4 years', '4-5 years', '5-6 years', '6-7 years', '7-8 years', '8-9 years', '9-10 years', '10-11 years', '11-12 years', '12-13 years', '13-14 years', '14-15 years', '15-16 years', 'Other'],
+                    us: ['2T', '3T', '4T', '5T', '6', '7', '8', '10', '12', '14', '16', 'Other'],
+                    eur: ['86', '92', '98', '104', '110', '116', '122', '128', '134', '140', '146', '152', '158', '164', '170', 'Other']
+                },
+                shoes: {
+                    uk: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', 'Other'],
+                    us: ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Other'],
+                    eur: ['17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', 'Other']
+                }
+            }
+        };
+
+        // Determine if we have a specific category selected
+        const hasSpecificCategory = this.selectedCategory && this.selectedCategory !== 'everything_else';
         
-        // Determine size category based on selected category
-        if (category === 'men' || category === 'women') {
-            sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One size'];
-        } else if (category === 'kids') {
-            sizes = ['2T', '3T', '4T', '5T', '6', '7', '8', '10', '12', '14', '16'];
+        if (!hasSpecificCategory) {
+            // No category selected - show full hierarchy (Menswear > Tops > UK > sizes)
+            this.createFullSizeHierarchy(sizeList, sizeStructure);
         } else {
-            // Default to common adult sizes (when no category or unknown category)
-            sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One size'];
+            // Category selected - show simplified hierarchy (UK > sizes)
+            this.createSimplifiedSizeHierarchy(sizeList, sizeStructure);
         }
 
-        sizes.forEach(size => {
-            const item = document.createElement('div');
-            item.className = 'dropdown-checkbox';
-            item.innerHTML = `
-                <input type="checkbox" id="size-${size}" value="${size}">
-                <label for="size-${size}">${size}</label>
+        this.attachSizeHandlers();
+    }
+
+    createFullSizeHierarchy(container, sizeStructure) {
+        // Create main categories (Menswear, Womenswear, Kids)
+        Object.keys(sizeStructure).forEach(mainCategory => {
+            const mainCategoryDiv = document.createElement('div');
+            mainCategoryDiv.className = 'size-hierarchy-level';
+            mainCategoryDiv.innerHTML = `
+                <div class="size-category-header" data-category="${mainCategory}">
+                    <span>${this.capitalizeCategory(mainCategory)}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="size-subcategories" style="display: none;"></div>
             `;
-            sizeList.appendChild(item);
+            container.appendChild(mainCategoryDiv);
+
+            // Add subcategories (Tops, Bottoms, Shoes, etc.)
+            const subcategoriesDiv = mainCategoryDiv.querySelector('.size-subcategories');
+            Object.keys(sizeStructure[mainCategory]).forEach(subCategory => {
+                const subCategoryDiv = document.createElement('div');
+                subCategoryDiv.className = 'size-hierarchy-level sub-level';
+                subCategoryDiv.innerHTML = `
+                    <div class="size-category-header" data-category="${mainCategory}" data-subcategory="${subCategory}">
+                        <span>${this.capitalizeCategory(subCategory)}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="size-systems" style="display: none;"></div>
+                `;
+                subcategoriesDiv.appendChild(subCategoryDiv);
+
+                // Add sizing systems (UK, US, EUR)
+                const systemsDiv = subCategoryDiv.querySelector('.size-systems');
+                Object.keys(sizeStructure[mainCategory][subCategory]).forEach(system => {
+                    const systemDiv = document.createElement('div');
+                    systemDiv.className = 'size-hierarchy-level system-level';
+                    systemDiv.innerHTML = `
+                        <div class="size-category-header" data-category="${mainCategory}" data-subcategory="${subCategory}" data-system="${system}">
+                            <span>${system.toUpperCase()}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="size-options" style="display: none;"></div>
+                    `;
+                    systemsDiv.appendChild(systemDiv);
+
+                    // Add actual sizes
+                    const sizesDiv = systemDiv.querySelector('.size-options');
+                    sizeStructure[mainCategory][subCategory][system].forEach(size => {
+                        const sizeOption = document.createElement('div');
+                        sizeOption.className = 'size-option';
+                        sizeOption.innerHTML = `
+                            <input type="checkbox" id="size-${mainCategory}-${subCategory}-${system}-${size}" value="${size}">
+                            <label for="size-${mainCategory}-${subCategory}-${system}-${size}">${size}</label>
+                        `;
+                        sizesDiv.appendChild(sizeOption);
+                    });
+                });
+            });
+        });
+    }
+
+    createSimplifiedSizeHierarchy(container, sizeStructure) {
+        // Get the appropriate size structure based on selected category
+        let categoryStructure;
+        if (this.selectedCategory === 'men') {
+            categoryStructure = sizeStructure.menswear;
+        } else if (this.selectedCategory === 'women') {
+            categoryStructure = sizeStructure.womenswear;
+        } else if (this.selectedCategory === 'kids') {
+            categoryStructure = sizeStructure.kids;
+        } else {
+            // Default to combined structure
+            categoryStructure = sizeStructure.menswear;
+        }
+
+        // Show sizing systems directly (UK, US, EUR)
+        const allSizingSystems = new Set();
+        Object.values(categoryStructure).forEach(subcat => {
+            Object.keys(subcat).forEach(system => allSizingSystems.add(system));
         });
 
-        this.attachMultiSelectHandlers('sizeList', this.selectedSizes, 'sizeLabel', 'Size');
+        allSizingSystems.forEach(system => {
+            const systemDiv = document.createElement('div');
+            systemDiv.className = 'size-hierarchy-level';
+            systemDiv.innerHTML = `
+                <div class="size-category-header" data-system="${system}">
+                    <span>${system.toUpperCase()}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="size-options" style="display: none;"></div>
+            `;
+            container.appendChild(systemDiv);
+
+            // Collect all sizes for this system across subcategories
+            const allSizes = new Set();
+            Object.values(categoryStructure).forEach(subcat => {
+                if (subcat[system]) {
+                    subcat[system].forEach(size => allSizes.add(size));
+                }
+            });
+
+            // Add sizes
+            const sizesDiv = systemDiv.querySelector('.size-options');
+            Array.from(allSizes).sort().forEach(size => {
+                const sizeOption = document.createElement('div');
+                sizeOption.className = 'size-option';
+                sizeOption.innerHTML = `
+                    <input type="checkbox" id="size-${system}-${size}" value="${size}">
+                    <label for="size-${system}-${size}">${size}</label>
+                `;
+                sizesDiv.appendChild(sizeOption);
+            });
+        });
+    }
+
+    attachSizeHandlers() {
+        const sizeList = document.getElementById('sizeList');
+        if (!sizeList) return;
+
+        // Handle category header clicks (expand/collapse)
+        sizeList.addEventListener('click', (e) => {
+            if (e.target.closest('.size-category-header')) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const header = e.target.closest('.size-category-header');
+                const nextDiv = header.nextElementSibling;
+                const icon = header.querySelector('i');
+                
+                if (nextDiv && (nextDiv.classList.contains('size-subcategories') || 
+                               nextDiv.classList.contains('size-systems') || 
+                               nextDiv.classList.contains('size-options'))) {
+                    const isVisible = nextDiv.style.display !== 'none';
+                    nextDiv.style.display = isVisible ? 'none' : 'block';
+                    
+                    if (icon) {
+                        icon.className = isVisible ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+                    }
+                }
+            }
+        });
+
+        // Handle size checkbox changes
+        sizeList.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+                if (e.target.checked) {
+                    this.selectedSizes.add(e.target.value);
+                } else {
+                    this.selectedSizes.delete(e.target.value);
+                }
+                this.updateLabel('sizeLabel', this.selectedSizes, 'Size');
+                this.updateActiveFilters();
+                this.triggerSearch(); // Live update
+            }
+        });
+
+        // Prevent dropdown from closing when clicking inside
+        sizeList.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    capitalizeCategory(category) {
+        return category.charAt(0).toUpperCase() + category.slice(1).replace(/wear$/, 'wear');
     }
 
     attachMultiSelectHandlers(listId, selectedSet, labelId, defaultLabel) {
@@ -968,6 +1193,10 @@ class DepopFilters {
                         this.selectedCategory = category;
                         document.getElementById('categoryLabel').textContent = e.target.textContent;
                         
+                        // Clear selected sizes when category changes
+                        this.selectedSizes.clear();
+                        this.updateLabel('sizeLabel', this.selectedSizes, 'Size');
+                        
                         // Show subcategories in the same dropdown
                         this.showCategoryHierarchy(category);
                         
@@ -1011,6 +1240,9 @@ class DepopFilters {
                 item.style.display = 'flex';
             });
         }
+
+        // Reset size filter to default state (no category selected)
+        this.populateSizes();
 
         this.updateActiveFilters();
         this.triggerSearch(); // Live update
