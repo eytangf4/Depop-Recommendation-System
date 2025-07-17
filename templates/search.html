@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
 {% endblock %}
 {% block body %}
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+<div class="container d-flex justify-content-center align-items-start" style="min-height: 100vh; padding-top: 2rem; padding-bottom: 4rem;">
     <div class="glass-card w-100" style="max-width:1700px;">
         <form id="searchForm" autocomplete="off">
             <div class="row mb-3">
@@ -15,42 +15,170 @@
                     <button type="submit" class="btn btn-primary w-100">Search</button>
                 </div>
             </div>
-            <div class="row mb-3">
-                <div class="col-md-2">
-                    <select class="form-control" id="groupInput" name="group">
-                        <option value="">Category</option>
-                        <option value="tops">Tops</option>
-                        <option value="bottoms">Bottoms</option>
-                        <option value="footwear">Footwear</option>
-                        <option value="accessories">Accessories</option>
-                        <option value="everything_else">Everything Else</option>
-                    </select>
+            <!-- Filter Bar (Depop Style) -->
+            <div class="filter-and-sort-container mb-3">
+                <!-- Mobile Filter Button -->
+                <button class="mobile-filter-button d-lg-none" type="button" id="mobileFilterBtn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M6.25 4C6.25 3.58579 6.58579 3.25 7 3.25H10C10.4142 3.25 10.75 3.58579 10.75 4V6.25H21C21.4142 6.25 21.75 6.58579 21.75 7C21.75 7.41421 21.4142 7.75 21 7.75H10.75V10C10.75 10.4142 10.4142 10.75 10 10.75H7C6.58579 10.75 6.25 10.4142 6.25 10V7.75H3C2.58579 7.75 2.25 7.41421 2.25 7C2.25 6.58579 2.58579 6.25 3 6.25H6.25V4ZM9.25 4.75V6.25H9.24996V7.75H9.25V9.25H7.75V7V4.75H9.25ZM14.25 14C14.25 13.5858 14.5858 13.25 15 13.25H18C18.4142 13.25 18.75 13.5858 18.75 14V16.25H21C21.4142 16.25 21.75 16.5858 21.75 17C21.75 17.4142 21.4142 17.75 21 17.75H18.75V20C18.75 20.4142 18.4142 20.75 18 20.75H15C14.5858 20.75 14.25 20.4142 14.25 20V17.75H3C2.58579 17.75 2.25 17.4142 2.25 17C2.25 16.5858 2.58579 16.25 3 16.25H14.25V14ZM17.25 14.75V17V19.25H15.75V17V14.75H17.25Z" fill="currentColor"/>
+                    </svg>
+                    Filter
+                </button>
+
+                <!-- Desktop Filters Container -->
+                <div class="filters-container d-none d-lg-block" id="filtersContainer">
+                    <div class="filters-header d-none">
+                        <h5>Filter</h5>
+                        <button type="button" class="btn-close" id="closeFiltersBtn"></button>
+                    </div>
+                    
+                    <!-- Filter Dropdowns Container -->
+                    <div class="filters-dropdowns-container">
+                        <!-- Category Filter -->
+                        <div class="filter-dropdown-container">
+                            <button class="filter-trigger" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="filter-text" id="categoryLabel">Category</span>
+                                <svg class="filter-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 16L20 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 15.9927L4.00008 8.00741" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <svg class="filter-forward d-none" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M19.9706 12H3.00002" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 4L20 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12.0073 20.0073L19.9926 12.0074" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <ul class="dropdown-menu" id="categoryList">
+                                <li><a class="dropdown-item" href="#" data-category="men">Men</a></li>
+                                <li><a class="dropdown-item" href="#" data-category="women">Women</a></li>
+                                <li><a class="dropdown-item" href="#" data-category="kids">Kids</a></li>
+                                <li><a class="dropdown-item" href="#" data-category="everything_else">Everything Else</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Subcategory Filter (initially hidden) -->
+                        <div class="filter-dropdown-container d-none" id="subcategoryContainer">
+                            <button class="filter-trigger" type="button" id="subcategoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="filter-text" id="subcategoryLabel">Subcategory</span>
+                                <svg class="filter-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 16L20 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 15.9927L4.00008 8.00741" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu p-2" id="subcategoryList" style="min-width: 250px; max-height: 300px; overflow-y: auto;"></div>
+                        </div>
+
+                        <!-- Brand Filter -->
+                        <div class="filter-dropdown-container">
+                            <button class="filter-trigger" type="button" id="brandDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="filter-text" id="brandLabel">Brand</span>
+                                <svg class="filter-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 16L20 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 15.9927L4.00008 8.00741" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu p-2" id="brandList" style="min-width: 200px; max-height: 300px; overflow-y: auto;"></div>
+                        </div>
+
+                        <!-- Price Filter -->
+                        <div class="filter-dropdown-container">
+                            <button class="filter-trigger" type="button" id="priceDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="filter-text" id="priceLabel">Price</span>
+                                <svg class="filter-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 16L20 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 15.9927L4.00008 8.00741" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu p-3" style="min-width: 200px;">
+                                <div class="mb-2">
+                                    <input type="number" class="form-control form-control-sm" id="priceMinInput" placeholder="Min $">
+                                </div>
+                                <div class="mb-2">
+                                    <input type="number" class="form-control form-control-sm" id="priceMaxInput" placeholder="Max $">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-primary w-100" id="applyPriceBtn">Apply</button>
+                            </div>
+                        </div>
+
+                        <!-- Size Filter -->
+                        <div class="filter-dropdown-container">
+                            <button class="filter-trigger" type="button" id="sizeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="filter-text" id="sizeLabel">Size</span>
+                                <svg class="filter-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 16L20 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 15.9927L4.00008 8.00741" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu p-2" id="sizeList" style="min-width: 150px;"></div>
+                        </div>
+
+                        <!-- Colour Filter -->
+                        <div class="filter-dropdown-container">
+                            <button class="filter-trigger" type="button" id="colorDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="filter-text" id="colorLabel">Colour</span>
+                                <svg class="filter-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 16L20 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 15.9927L4.00008 8.00741" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu p-2" id="colorList" style="min-width: 150px; max-height: 300px; overflow-y: auto;"></div>
+                        </div>
+
+                        <!-- Condition Filter -->
+                        <div class="filter-dropdown-container">
+                            <button class="filter-trigger" type="button" id="conditionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="filter-text" id="conditionLabel">Condition</span>
+                                <svg class="filter-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 16L20 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 15.9927L4.00008 8.00741" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu p-2" id="conditionList" style="min-width: 300px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- On Sale Checkbox -->
+                    <label class="on-sale-filter">
+                        <input type="checkbox" id="onSaleToggle">
+                        <span>On sale</span>
+                    </label>
+
+                    <!-- Filter Footer -->
+                    <div class="filter-footer d-none">
+                        <span class="items-count">1400000 items found</span>
+                        <div class="filter-footer-buttons">
+                            <button type="button" class="btn btn-outline-secondary" id="clearFiltersBtn">Clear all</button>
+                            <button type="button" class="btn btn-primary" id="viewItemsBtn">View items</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-control" id="genderInput" name="gender">
-                        <option value="">Gender</option>
-                        <option value="male">Men</option>
-                        <option value="female">Women</option>
-                        <option value="kids">Kids</option>
-                    </select>
+
+                <!-- Sort Button -->
+                <div class="sort-container">
+                    <button class="sort-trigger" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <svg class="sort-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M13 16.25L8 21.25L3 16.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 11.25V21.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M11 7.75L16 2.75L21 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 12.75L16 2.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span id="sortLabel">Sort</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" id="sortList">
+                        <li><a class="dropdown-item active" href="#" data-sort="relevance">Relevance</a></li>
+                        <li><a class="dropdown-item" href="#" data-sort="price_low">Price: Low to High</a></li>
+                        <li><a class="dropdown-item" href="#" data-sort="price_high">Price: High to Low</a></li>
+                        <li><a class="dropdown-item" href="#" data-sort="newest">Newly Listed</a></li>
+                    </ul>
                 </div>
-                <div class="col-md-2">
-                    <input type="text" class="form-control" id="brandInput" name="brand" placeholder="Brand">
-                </div>
-                <div class="col-md-2">
-                    <input type="text" class="form-control" id="sizeInput" name="size" placeholder="Size">
-                </div>
-                <div class="col-md-2">
-                    <input type="text" class="form-control" id="colorInput" name="color" placeholder="Color">
-                </div>
-                <div class="col-md-1">
-                    <input type="number" class="form-control" id="priceMinInput" name="price_min" placeholder="Min $">
-                </div>
-                <div class="col-md-1">
-                    <input type="number" class="form-control" id="priceMaxInput" name="price_max" placeholder="Max $">
-                </div>
-                <div class="col-md-1 d-flex align-items-center">
-                    <input type="checkbox" id="onSaleInput" name="on_sale" style="margin-right:5px;"> <label for="onSaleInput">On Sale</label>
+            </div>
+            
+            <!-- Active Filters Bar -->
+            <div class="row mb-3" id="activeFiltersRow" style="display: none;">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap align-items-center gap-2" id="activeFiltersPills">
+                        <!-- Active filter pills will be populated here -->
+                    </div>
                 </div>
             </div>
         </form>
@@ -63,5 +191,6 @@
         <div id="resultsContainer"></div>
     </div>
 </div>
+<script src="{{ url_for('static', filename='js/filters.js') }}"></script>
 <script src="{{ url_for('static', filename='js/search.js') }}"></script>
 {% endblock %}

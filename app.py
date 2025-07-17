@@ -111,17 +111,60 @@ def search_results():
         return jsonify({"error": "Unauthorized"}), 401
     data = request.get_json()
     query = data.get("query", "")
+    
+    # Handle the new hierarchy: category -> midlevel -> subcategory
+    main_category = data.get("category")  # men, women, kids, everything_else
+    midlevel = data.get("midlevel")  # tops, bottoms, etc.
+    subcategories = data.get("subcategory", []) if isinstance(data.get("subcategory"), list) else ([data.get("subcategory")] if data.get("subcategory") else [])
+    
+    # Map main category to gender
+    gender_mapping = {
+        'men': 'male',
+        'women': 'female', 
+        'kids': 'kids',
+        'everything_else': None
+    }
+    gender = gender_mapping.get(main_category) if main_category else None
+    
+    # Handle array-based multi-select filters
     filters = {
-        "group": data.get("group"),
-        "gender": data.get("gender"),
-        "brand": data.get("brand"),
-        "size": data.get("size"),
-        "color": data.get("color"),
+        "gender": gender,
+        "category": midlevel,  # Use midlevel as category for Depop API
+        "subcategory": subcategories,
+        "brand": data.get("brand", []) if isinstance(data.get("brand"), list) else ([data.get("brand")] if data.get("brand") else []),
+        "size": data.get("size", []) if isinstance(data.get("size"), list) else ([data.get("size")] if data.get("size") else []),
+        "color": data.get("color", []) if isinstance(data.get("color"), list) else ([data.get("color")] if data.get("color") else []),
+        "condition": data.get("condition", []) if isinstance(data.get("condition"), list) else ([data.get("condition")] if data.get("condition") else []),
         "price_min": data.get("price_min"),
         "price_max": data.get("price_max"),
-        "on_sale": data.get("on_sale")
+        "on_sale": data.get("on_sale"),
+        "sort": data.get("sort", "relevance")
     }
-    items, next_cursor = fetch_depop_items(query, **filters, max_items=24)
+    
+    # Pass arrays for multiple selections
+    api_filters = {
+        "gender": filters["gender"] if filters["gender"] != "men" and filters["gender"] != "women" else ("male" if filters["gender"] == "men" else "female"),
+        "category": filters["category"],
+        "subcategory": filters["subcategory"][0] if filters["subcategory"] else None,
+        "brand": filters["brand"] if filters["brand"] else None,
+        "size": filters["size"] if filters["size"] else None,  # Pass full size array
+        "color": filters["color"] if filters["color"] else None,
+        "condition": filters["condition"] if filters["condition"] else None,
+        "price_min": filters["price_min"],
+        "price_max": filters["price_max"],
+        "on_sale": filters["on_sale"],
+        "sort": filters["sort"]
+    }
+    
+    # Debug logging
+    print(f"DEBUG - Raw request data: {data}")
+    print(f"DEBUG - Main category: {main_category}")
+    print(f"DEBUG - Midlevel: {midlevel}")
+    print(f"DEBUG - API Filters: {api_filters}")
+    print(f"DEBUG - Color filters: {filters['color']}")
+    print(f"DEBUG - Condition filters: {filters['condition']}")
+    
+    items, next_cursor = fetch_depop_items(query, **api_filters, max_items=24)
     return jsonify({"items": items, "next_cursor": next_cursor})
 
 @app.route("/search_results_page", methods=["POST"])
@@ -131,17 +174,41 @@ def search_results_page():
     data = request.get_json()
     query = data.get("query", "")
     cursor = data.get("cursor")
+    
+    # Handle array-based multi-select filters
     filters = {
-        "group": data.get("group"),
-        "gender": data.get("gender"),
-        "brand": data.get("brand"),
-        "size": data.get("size"),
-        "color": data.get("color"),
+        "gender": data.get("category"),  # category is now the main gender filter
+        "category": None,  # Will be determined by subcategories
+        "subcategory": data.get("subcategory", []) if isinstance(data.get("subcategory"), list) else ([data.get("subcategory")] if data.get("subcategory") else []),
+        "brand": data.get("brand", []) if isinstance(data.get("brand"), list) else ([data.get("brand")] if data.get("brand") else []),
+        "size": data.get("size", []) if isinstance(data.get("size"), list) else ([data.get("size")] if data.get("size") else []),
+        "color": data.get("color", []) if isinstance(data.get("color"), list) else ([data.get("color")] if data.get("color") else []),
+        "condition": data.get("condition", []) if isinstance(data.get("condition"), list) else ([data.get("condition")] if data.get("condition") else []),
         "price_min": data.get("price_min"),
         "price_max": data.get("price_max"),
-        "on_sale": data.get("on_sale")
+        "on_sale": data.get("on_sale"),
+        "sort": data.get("sort", "relevance")
     }
-    items, next_cursor = fetch_depop_items(query, **filters, max_items=24, offset=cursor)
+    
+    # Pass arrays for multiple selections
+    api_filters = {
+        "gender": filters["gender"] if filters["gender"] != "men" and filters["gender"] != "women" else ("male" if filters["gender"] == "men" else "female"),
+        "category": filters["category"],
+        "subcategory": filters["subcategory"][0] if filters["subcategory"] else None,
+        "brand": filters["brand"] if filters["brand"] else None,
+        "size": filters["size"] if filters["size"] else None,  # Pass full size array
+        "color": filters["color"] if filters["color"] else None,
+        "condition": filters["condition"] if filters["condition"] else None,
+        "price_min": filters["price_min"],
+        "price_max": filters["price_max"],
+        "on_sale": filters["on_sale"],
+        "sort": filters["sort"]
+    }
+    
+    # Debug logging for pagination
+    print(f"DEBUG - Pagination API Filters: {api_filters}")
+    
+    items, next_cursor = fetch_depop_items(query, **api_filters, max_items=24, offset=cursor)
     return jsonify({"items": items, "next_cursor": next_cursor})
 
 # --- Feedback Route (placeholder, not storing yet) ---
