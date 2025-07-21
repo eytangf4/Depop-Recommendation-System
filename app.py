@@ -381,6 +381,7 @@ def init_db():
                 item_subcategory TEXT,
                 item_color TEXT,
                 item_condition TEXT,
+                item_image TEXT,
                 feedback_type INTEGER NOT NULL,  -- 2: love, 1: like, -1: dislike
                 search_query TEXT,
                 search_filters TEXT,  -- JSON string of filters used
