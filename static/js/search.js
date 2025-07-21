@@ -5,6 +5,8 @@ class SearchManager {
         this.isLoading = false;
         this.hasMoreResults = true;
         this.loadedItemUrls = new Set();
+        // Create a data store for item data to avoid JSON in HTML attributes
+        this.itemDataStore = new Map();
         this.setupSearchHandlers();
         this.setupInfiniteScroll();
         this.setupSpinner();
@@ -123,6 +125,8 @@ class SearchManager {
             this.nextCursor = null;
             this.hasMoreResults = true;
             this.loadedItemUrls.clear();
+            // Clear the item data store to prevent memory leaks
+            this.itemDataStore.clear();
             const resultsContainer = document.getElementById('resultsContainer');
             if (resultsContainer) {
                 resultsContainer.innerHTML = '';
@@ -228,6 +232,8 @@ class SearchManager {
         if (!resultsContainer) return;
 
         resultsContainer.innerHTML = '';
+        // Clear data store when displaying new results
+        this.itemDataStore.clear();
 
         if (!items || items.length === 0) {
             resultsContainer.innerHTML = '<p class="text-center">No items found. Try different search terms or filters.</p>';
@@ -271,6 +277,11 @@ class SearchManager {
         const card = document.createElement('div');
         card.className = 'depop-card';
         card.setAttribute('data-url', item.item_url);
+        
+        // Generate a unique ID for this item based on the URL (more reliable than random)
+        const itemId = 'item_' + btoa(item.item_url).replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
+        this.itemDataStore.set(itemId, item);
+        card.setAttribute('data-item-id', itemId);
 
         // Handle pricing display
         let priceHtml = '';
@@ -297,11 +308,17 @@ class SearchManager {
                 <div class="depop-size">${sizeHtml}</div>
             </div>
             <div class="depop-actions">
-                <form method="post" action="/feedback" class="feedback-form">
-                    <input type="hidden" name="item_url" value="${item.item_url}">
-                    <button type="submit" name="feedback" value="like" class="like-btn emoji-circle" title="Like">&#128077;</button>
-                    <button type="submit" name="feedback" value="dislike" class="dislike-btn emoji-circle" title="Dislike">&#128078;</button>
-                </form>
+                <div class="feedback-buttons">
+                    <button class="feedback-btn love-btn" data-feedback="love" data-item-id="${itemId}" title="Love it!">
+                        <span class="double-thumbs">👍👍</span>
+                    </button>
+                    <button class="feedback-btn like-btn" data-feedback="like" data-item-id="${itemId}" title="Like">
+                        <span class="single-thumb">👍</span>
+                    </button>
+                    <button class="feedback-btn dislike-btn" data-feedback="dislike" data-item-id="${itemId}" title="Not interested">
+                        <span class="dislike-thumb">👎</span>
+                    </button>
+                </div>
             </div>
         `;
 
@@ -315,6 +332,10 @@ class SearchManager {
             card.addEventListener('click', this.handleCardClick);
         });
 
+        // Feedback button handlers - use event delegation for dynamically loaded content
+        document.removeEventListener('click', this.handleFeedbackDelegate);
+        document.addEventListener('click', this.handleFeedbackDelegate.bind(this));
+
         // Image hover handlers
         document.querySelectorAll('.item-img').forEach(img => {
             const img1 = img.getAttribute('data-img1');
@@ -326,6 +347,340 @@ class SearchManager {
                 img.addEventListener('mouseleave', () => { img.src = img1; });
             }
         });
+
+        // Restore feedback states for currently displayed items
+        this.restoreRatingStates();
+    }
+
+    async restoreRatingStates() {
+        // Get all item URLs currently displayed
+        const itemCards = document.querySelectorAll('.depop-card');
+        const itemUrls = Array.from(itemCards).map(card => card.getAttribute('data-url')).filter(url => url);
+        
+        if (itemUrls.length === 0) return;
+
+        try {
+            const response = await fetch('/get_user_feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_urls: itemUrls })
+            });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+            const feedbackData = data.feedback || {};
+
+            // Apply feedback states to buttons
+            itemCards.forEach(card => {
+                const itemUrl = card.getAttribute('data-url');
+                const feedback = feedbackData[itemUrl];
+                
+                if (feedback && feedback !== 'none') {
+                    // Clear all clicked states first
+                    const allBtns = card.querySelectorAll('.feedback-btn');
+                    allBtns.forEach(btn => btn.classList.remove('clicked'));
+                    
+                    // Apply the correct clicked state
+                    const targetBtn = card.querySelector(`.${feedback}-btn`);
+                    if (targetBtn) {
+                        targetBtn.classList.add('clicked');
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('Error restoring rating states:', error);
+        }
+    }
+
+    handleFeedbackDelegate(e) {
+        // Check if the clicked element is a feedback button or within one
+        const feedbackBtn = e.target.closest('.feedback-btn');
+        if (feedbackBtn) {
+            console.log('🎯 Feedback button clicked via delegation:', feedbackBtn);
+            e.preventDefault();
+            e.stopPropagation();
+            this.handleFeedbackClick({
+                currentTarget: feedbackBtn,
+                preventDefault: () => {},
+                stopPropagation: () => {}
+            });
+        }
+    }
+
+    handleFeedbackClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const btn = e.currentTarget;
+        console.log('🎯 Feedback button clicked:', btn);
+        
+        const feedback = btn.getAttribute('data-feedback');
+        const itemId = btn.getAttribute('data-item-id');
+        
+        console.log('📝 Feedback type:', feedback);
+        console.log('� Item ID:', itemId);
+        
+        if (!feedback) {
+            console.error('❌ No feedback type found');
+            return;
+        }
+        
+        if (!itemId) {
+            console.error('❌ No item ID found');
+            return;
+        }
+        
+        // Get item data from store instead of parsing JSON
+        const itemData = this.itemDataStore.get(itemId);
+        if (!itemData) {
+            console.error('❌ Item data not found in store for ID:', itemId);
+            return;
+        }
+        
+        console.log('📦 Retrieved item data:', itemData);
+        
+        const itemCard = btn.closest('.depop-card');
+        if (!itemCard) {
+            console.error('❌ Could not find item card');
+            return;
+        }
+        
+        // Check if this button is already clicked (toggle functionality)
+        const isCurrentlyClicked = btn.classList.contains('clicked');
+        
+        // Clear previous selections on this item
+        const allFeedbackBtns = itemCard.querySelectorAll('.feedback-btn');
+        allFeedbackBtns.forEach(b => b.classList.remove('clicked'));
+        
+        // If button was already clicked, remove the rating (toggle off)
+        if (isCurrentlyClicked) {
+            console.log('🔄 Toggling off rating');
+            // Visual feedback for removal
+            btn.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+            }, 150);
+            
+            // Send removal feedback to server
+            this.removeFeedback(itemData, btn);
+            return;
+        }
+        
+        // Mark this button as clicked
+        btn.classList.add('clicked');
+        
+        // Visual feedback animation
+        btn.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            btn.style.transform = 'scale(1)';
+        }, 150);
+        
+        console.log('📤 Submitting feedback...');
+        
+        // Send feedback to server
+        this.submitFeedback(feedback, itemData, btn);
+    }
+
+    submitFeedback(feedback, item, btn) {
+        console.log('🚀 Starting feedback submission:', feedback, item);
+        
+        // Convert arrays to strings for database storage
+        let itemSize = item.size || '';
+        if (Array.isArray(itemSize)) {
+            itemSize = itemSize.join(', ');
+        }
+        
+        // Use all_sizes if available, otherwise use size
+        if (item.all_sizes && Array.isArray(item.all_sizes)) {
+            itemSize = item.all_sizes.join(', ');
+        }
+
+        // Handle category and subcategory arrays
+        let itemCategory = this.currentFilters?.category || '';
+        if (Array.isArray(itemCategory)) {
+            itemCategory = itemCategory.join(', ');
+        }
+
+        let itemSubcategory = this.currentFilters?.subcategory || '';
+        if (Array.isArray(itemSubcategory)) {
+            itemSubcategory = itemSubcategory.join(', ');
+        }
+
+        const feedbackData = {
+            feedback: feedback,
+            item_url: item.item_url,
+            item_title: item.title,
+            item_brand: item.brand || '',
+            item_sizes: itemSize,
+            item_price: item.price || item.price_sale,
+            item_image: item.image_url || item.image || '',
+            item_category: itemCategory,
+            item_subcategory: itemSubcategory,
+            item_color: '', // Could extract from title/description
+            item_condition: '', // Could extract from item data
+            search_query: this.currentFilters?.query || '',
+            search_filters: JSON.stringify(this.currentFilters || {})
+        };
+
+        console.log('📦 Feedback data being sent:', feedbackData);
+
+        // Disable button during request
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        fetch('/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(feedbackData)
+        })
+        .then(response => {
+            console.log('📡 Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Feedback response:', data);
+            if (data.message) {
+                console.log(`🧠 Model Learning: ${feedback} feedback recorded for "${item.title}"`);
+                console.log(`📊 Training Progress: ${data.training_info || 'Neural network updated'}`);
+                
+                // Keep the button in clicked state to show it was successful
+                btn.classList.add('clicked');
+                this.showFeedbackSuccess(feedback);
+            } else if (data.error) {
+                console.error('❌ Server error:', data.error);
+                // If there was an error, remove the clicked state
+                btn.classList.remove('clicked');
+                this.showFeedbackError(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error submitting feedback:', error);
+            // Remove clicked state on error
+            btn.classList.remove('clicked');
+            this.showFeedbackError('Failed to submit feedback. Please try again.');
+        })
+        .finally(() => {
+            // Re-enable button
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    }
+
+    removeFeedback(item, btn) {
+        const feedbackData = {
+            feedback: 'remove',
+            item_url: item.item_url,
+            item_title: item.title
+        };
+
+        fetch('/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(feedbackData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                console.log(`🧠 Model Learning: Rating removed for "${item.title}"`);
+                console.log(`📊 Training Progress: ${data.training_info || 'Neural network updated'}`);
+                this.showFeedbackSuccess('remove');
+            } else {
+                console.error('Error removing feedback');
+            }
+        })
+        .catch(error => {
+            console.error('Error removing feedback:', error);
+        });
+    }
+
+    showFeedbackSuccess(feedback) {
+        // Optional: Show a brief toast notification
+        const message = feedback === 'love' ? 'Added to favorites! 💖' : 
+                       feedback === 'like' ? 'Liked! 👍' : 
+                       feedback === 'dislike' ? 'Not interested 👎' :
+                       feedback === 'remove' ? 'Rating removed ↩️' : 'Updated!';
+        
+        // You could implement a toast notification here
+        console.log(`✓ ${message}`);
+        
+        // Optional: Add a subtle visual indicator
+        this.showBriefNotification(message);
+    }
+
+    showBriefNotification(message) {
+        // Create a temporary notification element
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 10000;
+            transform: translateX(300px);
+            transition: transform 0.3s ease;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 10);
+
+        // Remove after 2 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(300px)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 2000);
+    }
+
+    showFeedbackError(message) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 10000;
+            transform: translateX(300px);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+        `;
+        notification.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+        document.body.appendChild(notification);
+
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 10);
+
+        // Remove after 5 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(300px)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 5000);
     }
 
     handleCardClick(e) {

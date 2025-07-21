@@ -26,12 +26,62 @@ class DepopFilters {
         this.populateStaticFilters();
         this.setupEventListeners();
         this.setupActiveFilters();
+        this.setupDropdownManagement();
         
         // Debug: Check if Bootstrap is loaded
         if (typeof bootstrap === 'undefined') {
             console.error('Bootstrap JavaScript is not loaded!');
         } else {
             console.log('Bootstrap loaded successfully');
+        }
+    }
+
+    setupDropdownManagement() {
+        // Manage Bootstrap dropdowns to prevent conflicts
+        const dropdownTriggers = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+        
+        // Track which dropdown is currently open
+        let currentOpenDropdown = null;
+        
+        dropdownTriggers.forEach(trigger => {
+            // Track when a dropdown is shown
+            trigger.addEventListener('show.bs.dropdown', (e) => {
+                // Only close other dropdowns if a different one is being opened
+                if (currentOpenDropdown && currentOpenDropdown !== trigger) {
+                    const dropdown = bootstrap.Dropdown.getInstance(currentOpenDropdown);
+                    if (dropdown) {
+                        dropdown.hide();
+                    }
+                }
+                currentOpenDropdown = trigger;
+            });
+            
+            // Track when a dropdown is hidden
+            trigger.addEventListener('hidden.bs.dropdown', (e) => {
+                if (currentOpenDropdown === trigger) {
+                    currentOpenDropdown = null;
+                }
+                // Reset aria-expanded state
+                trigger.setAttribute('aria-expanded', 'false');
+            });
+        });
+        
+        // Special handling for size dropdown to ensure it opens after category selection
+        const sizeDropdown = document.getElementById('sizeDropdown');
+        if (sizeDropdown) {
+            // Remove the aggressive click override - let Bootstrap handle it naturally
+            sizeDropdown.addEventListener('click', (e) => {
+                // Just ensure any conflicting states are cleared
+                const isExpanded = sizeDropdown.getAttribute('aria-expanded') === 'true';
+                
+                if (!isExpanded) {
+                    // Small delay to ensure category operations are complete
+                    setTimeout(() => {
+                        const sizeDropdownInstance = bootstrap.Dropdown.getOrCreateInstance(sizeDropdown);
+                        // Let Bootstrap handle the toggle naturally
+                    }, 10);
+                }
+            });
         }
     }
 
@@ -471,29 +521,48 @@ class DepopFilters {
             categoryStructure = sizeStructure.menswear;
         }
 
+        // Determine which subcategories to show based on selected midlevels
+        let relevantSubcategories = [];
+        if (this.selectedMidlevels.size > 0) {
+            // Extract subcategory names from selected midlevels (e.g., "men/tops" -> "tops")
+            this.selectedMidlevels.forEach(midlevelKey => {
+                const [main, midlevel] = midlevelKey.split('/');
+                if (main === this.selectedCategory && categoryStructure[midlevel]) {
+                    relevantSubcategories.push(midlevel);
+                }
+            });
+        }
+        
+        // If no specific subcategories selected, show all for the category
+        if (relevantSubcategories.length === 0) {
+            relevantSubcategories = Object.keys(categoryStructure);
+        }
+
         // Show sizing systems directly (UK, US, EUR)
         const allSizingSystems = new Set();
-        Object.values(categoryStructure).forEach(subcat => {
-            Object.keys(subcat).forEach(system => allSizingSystems.add(system));
+        relevantSubcategories.forEach(subcat => {
+            if (categoryStructure[subcat]) {
+                Object.keys(categoryStructure[subcat]).forEach(system => allSizingSystems.add(system));
+            }
         });
 
         allSizingSystems.forEach(system => {
             const systemDiv = document.createElement('div');
-            systemDiv.className = 'size-hierarchy-level';
+            systemDiv.className = 'size-hierarchy-level simplified-size-level';
             systemDiv.innerHTML = `
-                <div class="size-category-header" data-system="${system}">
+                <div class="size-category-header simplified-header" data-system="${system}" data-simplified="true">
                     <span>${system.toUpperCase()}</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
-                <div class="size-options" style="display: none;"></div>
+                <div class="size-options simplified-options" style="display: none; max-height: 200px; overflow-y: auto;"></div>
             `;
             container.appendChild(systemDiv);
 
-            // Collect all sizes for this system across subcategories
+            // Collect sizes for this system from relevant subcategories only
             const allSizes = new Set();
-            Object.values(categoryStructure).forEach(subcat => {
-                if (subcat[system]) {
-                    subcat[system].forEach(size => allSizes.add(size));
+            relevantSubcategories.forEach(subcat => {
+                if (categoryStructure[subcat] && categoryStructure[subcat][system]) {
+                    categoryStructure[subcat][system].forEach(size => allSizes.add(size));
                 }
             });
 
@@ -501,10 +570,10 @@ class DepopFilters {
             const sizesDiv = systemDiv.querySelector('.size-options');
             Array.from(allSizes).sort().forEach(size => {
                 const sizeOption = document.createElement('div');
-                sizeOption.className = 'size-option';
+                sizeOption.className = 'dropdown-checkbox';
                 sizeOption.innerHTML = `
-                    <input type="checkbox" id="size-${system}-${size}" value="${size}">
-                    <label for="size-${system}-${size}">${size}</label>
+                    <input type="checkbox" id="size-${system}-${size.replace(/\s+/g, '-')}" value="${size}">
+                    <label for="size-${system}-${size.replace(/\s+/g, '-')}">${size}</label>
                 `;
                 sizesDiv.appendChild(sizeOption);
             });
@@ -515,8 +584,14 @@ class DepopFilters {
         const sizeList = document.getElementById('sizeList');
         if (!sizeList) return;
 
-        // Handle category header clicks (expand/collapse)
-        sizeList.addEventListener('click', (e) => {
+        // Remove any existing handlers to prevent duplicates
+        const existingHandler = sizeList._sizeHandler;
+        if (existingHandler) {
+            sizeList.removeEventListener('click', existingHandler);
+        }
+
+        // Create new handler function
+        const newHandler = (e) => {
             if (e.target.closest('.size-category-header')) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -528,15 +603,28 @@ class DepopFilters {
                 if (nextDiv && (nextDiv.classList.contains('size-subcategories') || 
                                nextDiv.classList.contains('size-systems') || 
                                nextDiv.classList.contains('size-options'))) {
-                    const isVisible = nextDiv.style.display !== 'none';
-                    nextDiv.style.display = isVisible ? 'none' : 'block';
                     
-                    if (icon) {
-                        icon.className = isVisible ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+                    const isCurrentlyHidden = nextDiv.style.display === 'none' || nextDiv.style.display === '';
+                    
+                    // Toggle visibility
+                    if (isCurrentlyHidden) {
+                        nextDiv.style.display = 'block';
+                        if (icon) {
+                            icon.className = 'fas fa-chevron-up';
+                        }
+                    } else {
+                        nextDiv.style.display = 'none';
+                        if (icon) {
+                            icon.className = 'fas fa-chevron-down';
+                        }
                     }
                 }
             }
-        });
+        };
+
+        // Store reference to handler and attach it
+        sizeList._sizeHandler = newHandler;
+        sizeList.addEventListener('click', newHandler);
 
         // Handle size checkbox changes
         sizeList.addEventListener('change', (e) => {
@@ -618,11 +706,23 @@ class DepopFilters {
                 const subcategory = e.target.getAttribute('data-subcategory');
                 
                 if (category) {
-                    // Main category selection (Men, Women, etc.) - just toggle expansion
+                    // Main category selection (Men, Women, etc.) - set selected category and update sizes
+                    this.selectedCategory = category;
                     this.showCategoryHierarchy(category);
                     
                     // Update size filter based on category
-                    this.populateSizes(category);
+                    setTimeout(() => {
+                        this.populateSizes(category);
+                        // Ensure size dropdown remains functional after repopulation
+                        const sizeDropdown = document.querySelector('#sizeDropdown');
+                        if (sizeDropdown && window.bootstrap) {
+                            // Re-initialize Bootstrap dropdown if needed
+                            const dropdownInstance = bootstrap.Dropdown.getInstance(sizeDropdown);
+                            if (!dropdownInstance) {
+                                new bootstrap.Dropdown(sizeDropdown);
+                            }
+                        }
+                    }, 50);
                 } else if (subcategory) {
                     // Subcategory selection (T-shirts, Jeans, etc.)
                     if (this.selectedSubcategories.has(subcategory)) {
@@ -714,6 +814,12 @@ class DepopFilters {
             // Collapse - remove midlevel items and collapse state
             this.expandedCategories.delete(mainCategory);
             this.removeMidlevelItems(mainCategory);
+            
+            // Reset selected category when collapsing
+            this.selectedCategory = null;
+            
+            // Reset size filter to show all sizes
+            this.populateSizes();
             return;
         }
 

@@ -1,0 +1,644 @@
+{% extends "base.html" %}
+{% block title %}Depop Recommender | My Ratings{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+<style>
+.rating-item {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.rating-item.deleting {
+    opacity: 0.3;
+    transform: scale(0.95);
+}
+
+.delete-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    z-index: 10;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+}
+
+.rating-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.rating-header h2 {
+    color: #2c3e50;
+    font-weight: 700;
+    margin: 0;
+}
+
+.rating-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.rating-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 80px;
+}
+
+.rating-badge.loved {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+}
+
+.rating-badge.liked {
+    background: linear-gradient(135deg, #2ed573, #1dd1a1);
+    color: white;
+}
+
+.rating-badge.disliked {
+    background: linear-gradient(135deg, #ff4757, #c44569);
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #666;
+}
+
+.empty-state h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.back-to-search {
+    margin-top: 2rem;
+}
+
+.rating-timestamp {
+    margin-top: 0.5rem;
+}
+
+/* Ensure delete overlay works properly */
+.depop-card {
+    position: relative;
+}
+
+.delete-btn-small {
+    background: none;
+    border: none;
+    color: #666;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.delete-btn-small:hover {
+    background: #f8f9fa;
+    color: #dc3545;
+}
+</style>
+{% endblock %}
+{% block body %}
+<div class="container d-flex justify-content-center align-items-start" style="min-height: 100vh; padding-top: 2rem; padding-bottom: 4rem;">
+    <div class="glass-card w-100" style="max-width:1700px;">
+        <div class="rating-header">
+            <h2>My Ratings</h2>
+            <div class="rating-stats">
+                <span class="rating-badge loved" id="lovedCount">0 Loved</span>
+                <span class="rating-badge liked" id="likedCount">0 Liked</span>
+                <span class="rating-badge disliked" id="dislikedCount">0 Disliked</span>
+            </div>
+        </div>
+        
+        <div id="ratingsContainer">
+            <div class="empty-state" id="emptyState">
+                <h3>No ratings yet!</h3>
+                <p>Start rating items to see them here.</p>
+                <div class="back-to-search">
+                    <a href="/search" class="btn btn-primary">Start Shopping</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Working My Ratings implementation
+console.log('My Ratings page loaded');
+
+let isLoading = false; // Prevent multiple simultaneous calls
+
+async function loadAndDisplayRatings() {
+    if (isLoading) {
+        console.log('Already loading ratings, skipping...');
+        return;
+    }
+    
+    isLoading = true;
+    console.log('loadAndDisplayRatings called');
+    try {
+        console.log('Making API call to /get_user_ratings');
+        const response = await fetch('/get_user_ratings', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        console.log('Response received:', response.status, response.ok);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Ratings data received:', data);
+
+        // Update stats - check elements exist first
+        const lovedCount = document.getElementById('lovedCount');
+        const likedCount = document.getElementById('likedCount');
+        const dislikedCount = document.getElementById('dislikedCount');
+        
+        if (lovedCount) lovedCount.textContent = `${data.stats.loved || 0} Loved`;
+        if (likedCount) likedCount.textContent = `${data.stats.liked || 0} Liked`;
+        if (dislikedCount) dislikedCount.textContent = `${data.stats.disliked || 0} Disliked`;
+
+        const container = document.getElementById('ratingsContainer');
+        const emptyState = document.getElementById('emptyState');
+
+        console.log('Container found:', !!container, 'EmptyState found:', !!emptyState);
+        console.log('Ratings count:', data.ratings ? data.ratings.length : 0);
+
+        if (data.ratings && data.ratings.length > 0) {
+            if (emptyState) emptyState.style.display = 'none';
+            
+            if (container) {
+                // Create the same grid layout structure as search results
+                container.innerHTML = ''; // Clear first
+                console.log('Container cleared, creating grid...');
+                
+                // Create results grid container (like search.js)
+                let grid = container.querySelector('.results-grid');
+                if (!grid) {
+                    grid = document.createElement('div');
+                    grid.className = 'results-grid';
+                    container.appendChild(grid);
+                    console.log('Grid created with class:', grid.className);
+                }
+                
+                // Create each rating card as DOM element (like search.js)
+                data.ratings.forEach((item, index) => {
+                    console.log('Creating card for item:', item.item_title);
+                    const cardElement = createRatingCard(item, index);
+                    console.log('Card element created:', cardElement);
+                    grid.appendChild(cardElement);
+                });
+                
+                console.log('All cards added to grid. Grid children count:', grid.children.length);
+                
+                // Add handlers like search results
+                addImageHoverHandlers();
+                attachFeedbackHandlers();
+            }
+        } else {
+            if (emptyState) emptyState.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error loading ratings:', error);
+        const container = document.getElementById('ratingsContainer');
+        if (container) {
+            container.innerHTML = `<div class="alert alert-danger">Failed to load ratings: ${error.message}</div>`;
+        }
+    } finally {
+        isLoading = false;
+    }
+}
+
+function createRatingCard(item, index) {
+    // Create card as DOM element (exactly like search.js)
+    const card = document.createElement('div');
+    card.className = 'depop-card';
+    card.setAttribute('data-url', item.item_url);
+    card.setAttribute('data-rating-id', item.rating_info?.rating_id);
+
+    // Handle image URL (make sure it exists)
+    const imageUrl = item.item_image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NS4wMDAzIDEyNUwxMDAgOTlMMTI1IDEyNUwxNTAgOTlWODBIMTYwVjE2NEg0MFY4MEg1MFY5OUw3NS4wMDAzIDEyNVoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+Cg==';
+
+    // Handle pricing display (exactly like search.js)
+    let priceHtml = '';
+    if (item.item_price) {
+        priceHtml = `<span class="price-sale" style="color:#222;font-weight:600;">$${Number(item.item_price).toFixed(2)}</span>`;
+    }
+
+    // Handle size display (exactly like search.js)
+    let sizeHtml = '';
+    if (item.sizes && item.sizes.length > 1) {
+        sizeHtml = `Size: ${item.sizes.join(', ')}`;
+    } else if (item.sizes && item.sizes.length > 0) {
+        sizeHtml = `Size: ${item.sizes[0]}`;
+    }
+    // If no sizes, sizeHtml stays empty (like search results)
+    
+    // Determine which button should be clicked based on rating
+    const feedbackType = item.rating_info?.feedback_type;
+    const isLoved = feedbackType === 'love';
+    const isLiked = feedbackType === 'like';
+    const isDisliked = feedbackType === 'dislike';
+    
+    // Create item data object for buttons (exactly like search.js)
+    const itemData = {
+        item_url: item.item_url,
+        item_title: item.item_title,
+        item_brand: item.item_brand,
+        price: item.item_price,
+        price_sale: item.item_price,
+        image_url: imageUrl,
+        size: item.sizes && item.sizes.length > 0 ? (Array.isArray(item.sizes) ? item.sizes[0] : item.sizes) : null,
+        all_sizes: Array.isArray(item.sizes) ? item.sizes : (item.sizes ? [item.sizes] : [])
+    };
+    
+    // Create the exact same structure as search.js
+    card.innerHTML = `
+        <div class="depop-img-wrap">
+            <img src="${imageUrl}" alt="Item image" class="item-img" data-img1="${imageUrl}" data-img2="${imageUrl}">
+        </div>
+        <div class="depop-info">
+            <div class="depop-price">${priceHtml}</div>
+            <div class="depop-size">${sizeHtml}</div>
+        </div>
+        <div class="depop-actions">
+            <div class="feedback-buttons">
+                <button class="feedback-btn love-btn ${isLoved ? 'clicked' : ''}" data-feedback="love" data-item='${JSON.stringify(itemData)}' title="Love it!">
+                    <span class="double-thumbs">👍👍</span>
+                </button>
+                <button class="feedback-btn like-btn ${isLiked ? 'clicked' : ''}" data-feedback="like" data-item='${JSON.stringify(itemData)}' title="Like">
+                    <span class="single-thumb">👍</span>
+                </button>
+                <button class="feedback-btn dislike-btn ${isDisliked ? 'clicked' : ''}" data-feedback="dislike" data-item='${JSON.stringify(itemData)}' title="Not interested">
+                    <span class="dislike-thumb">👎</span>
+                </button>
+                <button class="feedback-btn delete-btn-small" onclick="deleteRating(${item.rating_info?.rating_id}, ${index})" title="Delete rating">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+
+    return card;
+}
+
+function addImageHoverHandlers() {
+    // Image hover handlers
+    document.querySelectorAll('.item-img').forEach(img => {
+        const img1 = img.getAttribute('data-img1');
+        const img2 = img.getAttribute('data-img2');
+        if (img2 && img2 !== '') {
+            img.addEventListener('mouseenter', () => img.src = img2);
+            img.addEventListener('mouseleave', () => img.src = img1);
+        }
+    });
+}
+
+function attachFeedbackHandlers() {
+    // Remove any existing event listeners
+    document.removeEventListener('click', handleFeedbackDelegate);
+    // Add event delegation for feedback buttons (like search results)
+    document.addEventListener('click', handleFeedbackDelegate);
+    console.log('Event delegation attached for feedback buttons');
+}
+
+function handleFeedbackDelegate(event) {
+    console.log('Click detected on:', event.target);
+    
+    const btn = event.target.closest('.feedback-btn');
+    console.log('Feedback button found:', btn);
+    
+    if (!btn) return;
+    
+    // Skip delete button - handle separately
+    if (btn.classList.contains('delete-btn-small')) {
+        console.log('Delete button clicked, skipping');
+        return;
+    }
+    
+    console.log('Processing feedback button click...');
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const feedback = btn.getAttribute('data-feedback');
+    const itemDataStr = btn.getAttribute('data-item');
+    
+    console.log('Feedback button clicked:', feedback, itemDataStr);
+    
+    if (!itemDataStr) {
+        console.error('No item data found');
+        return;
+    }
+    
+    let itemData;
+    try {
+        itemData = JSON.parse(itemDataStr);
+    } catch (error) {
+        console.error('Failed to parse item data:', error);
+        return;
+    }
+    
+    const itemCard = btn.closest('.depop-card');
+    if (!itemCard) {
+        console.error('Could not find item card');
+        return;
+    }
+    
+    // Check if this button is already clicked (toggle functionality)
+    const isCurrentlyClicked = btn.classList.contains('clicked');
+    
+    // Clear previous selections on this item
+    const allFeedbackBtns = itemCard.querySelectorAll('.feedback-btn:not(.delete-btn-small)');
+    allFeedbackBtns.forEach(b => b.classList.remove('clicked'));
+    
+    // If button was already clicked, remove the rating (toggle off)
+    if (isCurrentlyClicked) {
+        console.log('Toggling off rating');
+        // Visual feedback for removal
+        btn.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            btn.style.transform = 'scale(1)';
+        }, 150);
+        
+        // Send removal feedback to server
+        removeFeedback(itemData, btn);
+        return;
+    }
+    
+    // Mark this button as clicked
+    btn.classList.add('clicked');
+    
+    // Visual feedback animation
+    btn.style.transform = 'scale(1.2)';
+    setTimeout(() => {
+        btn.style.transform = 'scale(1)';
+    }, 150);
+    
+    console.log('Submitting feedback...');
+    
+    // Send feedback to server
+    submitFeedback(feedback, itemData, btn);
+}
+
+function submitFeedback(feedback, item, btn) {
+    console.log('Starting feedback submission:', feedback, item);
+    
+    // Convert arrays to strings for database storage
+    let itemSize = item.size || '';
+    if (Array.isArray(itemSize)) {
+        itemSize = itemSize.join(', ');
+    }
+    
+    // Use all_sizes if available, otherwise use size
+    if (item.all_sizes && Array.isArray(item.all_sizes)) {
+        itemSize = item.all_sizes.join(', ');
+    }
+
+    const feedbackData = {
+        feedback: feedback,
+        item_url: item.item_url,
+        item_title: item.item_title,
+        item_brand: item.item_brand || '',
+        item_size: itemSize,
+        item_price: item.price || item.price_sale,
+        item_image: item.image_url || item.image || '',
+        item_category: '',
+        item_subcategory: '',
+        item_color: '',
+        item_condition: '',
+        search_query: '',
+        search_filters: '{}'
+    };
+
+    console.log('Feedback data being sent:', feedbackData);
+
+    // Disable button during request
+    btn.disabled = true;
+
+    fetch('/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feedbackData)
+    })
+    .then(response => {
+        console.log('Feedback response:', response.status, response.ok);
+        if (!response.ok) throw new Error('Failed to update rating');
+        return response.json();
+    })
+    .then(result => {
+        console.log('Feedback result:', result);
+        showToast(`Item ${feedback}d successfully!`, 'success');
+        
+        // Reload ratings to show updated state
+        setTimeout(() => {
+            isLoading = false; // Reset loading state before reload
+            loadAndDisplayRatings();
+        }, 500);
+    })
+    .catch(error => {
+        console.error('Error updating rating:', error);
+        showToast('Failed to update rating', 'error');
+        // Remove clicked state on error
+        btn.classList.remove('clicked');
+    })
+    .finally(() => {
+        btn.disabled = false;
+    });
+}
+
+function removeFeedback(item, btn) {
+    const feedbackData = {
+        feedback: 'remove',
+        item_url: item.item_url
+    };
+
+    console.log('Removing feedback:', feedbackData);
+
+    // Disable button during request
+    btn.disabled = true;
+
+    fetch('/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feedbackData)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to remove rating');
+        return response.json();
+    })
+    .then(result => {
+        console.log('Removal result:', result);
+        showToast('Rating removed successfully!', 'success');
+        
+        // Reload ratings to show updated state
+        setTimeout(() => {
+            isLoading = false;
+            loadAndDisplayRatings();
+        }, 500);
+    })
+    .catch(error => {
+        console.error('Error removing rating:', error);
+        showToast('Failed to remove rating', 'error');
+    })
+    .finally(() => {
+        btn.disabled = false;
+    });
+}
+
+async function deleteRating(ratingId, index) {
+    if (!confirm('Are you sure you want to delete this rating?')) {
+        return;
+    }
+    
+    console.log(`Deleting rating ${ratingId}`);
+    
+    // Immediately disable the button to prevent double-clicks
+    const deleteBtn = document.querySelector(`[onclick*="deleteRating(${ratingId}, ${index})"]`);
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    
+    try {
+        const response = await fetch('/delete_rating', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rating_id: ratingId })
+        });
+
+        console.log('Delete response:', response.status, response.ok);
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('Delete result:', result);
+            
+            // Immediately remove the card from UI
+            const card = document.querySelector(`[data-rating-id="${ratingId}"]`);
+            if (card) {
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    card.remove();
+                    
+                    // Check if no more cards exist
+                    const remainingCards = document.querySelectorAll('.depop-card');
+                    if (remainingCards.length === 0) {
+                        // Show empty state
+                        const container = document.getElementById('ratingsContainer');
+                        const emptyState = document.getElementById('emptyState');
+                        if (container) container.innerHTML = '';
+                        if (emptyState) emptyState.style.display = 'block';
+                    }
+                }, 300);
+            }
+            
+            showToast('Rating deleted successfully!', 'success');
+        } else {
+            const errorData = await response.json();
+            console.error('Delete error response:', errorData);
+            throw new Error(errorData.error || 'Failed to delete rating');
+        }
+    } catch (error) {
+        console.error('Error deleting rating:', error);
+        showToast(`Failed to delete rating: ${error.message}`, 'error');
+        
+        // Re-enable button on error
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        }
+    }
+}
+
+function openDepopPage(url) {
+    window.open(url, '_blank');
+}
+
+function formatSizes(sizes) {
+    if (!sizes || sizes.length === 0) return 'Size not specified';
+    if (Array.isArray(sizes)) {
+        return sizes.join(', ');
+    }
+    return sizes;
+}
+
+function formatDate(timestamp) {
+    if (!timestamp) return 'Unknown date';
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) {
+        return 'today';
+    } else if (diffDays <= 7) {
+        return `${diffDays} days ago`;
+    } else if (diffDays <= 30) {
+        return `${Math.ceil(diffDays / 7)} weeks ago`;
+    } else {
+        return date.toLocaleDateString();
+    }
+}
+
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 3000);
+}
+
+// Load ratings when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - initializing My Ratings');
+    loadAndDisplayRatings();
+});
+
+// Single fallback timeout instead of multiple event listeners
+setTimeout(() => {
+    const container = document.getElementById('ratingsContainer');
+    if (container && !container.innerHTML.includes('results-grid') && !container.innerHTML.includes('alert')) {
+        console.log('Fallback timeout: Re-running loadAndDisplayRatings');
+        loadAndDisplayRatings();
+    }
+}, 1000);
+</script>
+{% endblock %}

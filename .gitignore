@@ -1,5 +1,34 @@
 venv/
 __pycache__/
+*.pyc
+*.pyo
+*.log
+*.tmp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment and configuration
 .env
+*.env
+
+# Database files
 users.db
-._DS_Store
+*.sqlite3
+*.db
+
+# Model files (large binaries)
+*.pt
+*.pth
+models/
+
+# Temporary files
+*.log
+*.tmp
+*.temp

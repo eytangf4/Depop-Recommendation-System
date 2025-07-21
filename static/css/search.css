@@ -898,6 +898,35 @@
     border-radius: 3px;
 }
 
+/* Simplified size hierarchy (when category is selected) */
+.simplified-size-level {
+    margin-bottom: 0.75rem;
+}
+
+.simplified-header {
+    background: #e3f2fd !important;
+    border-color: #2196f3 !important;
+    color: #1976d2 !important;
+    margin-left: 0 !important;
+}
+
+.simplified-options {
+    margin-left: 0 !important;
+    background: #fafafa !important;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.simplified-options .dropdown-checkbox {
+    padding: 0.25rem 0.75rem;
+}
+
+.simplified-options .dropdown-checkbox:hover {
+    background: #f0f0f0;
+}
+
+/* Responsive Design */
+
 #sizeList::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
@@ -919,4 +948,104 @@
         min-height: 2rem;
         font-size: 0.8rem;
     }
+}
+
+/* Enhanced Feedback System Styles */
+.feedback-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
+.feedback-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border: 2px solid #e9ecef;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.2rem;
+    padding: 0;
+}
+
+.feedback-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Active/clicked states for feedback buttons */
+.feedback-btn.clicked {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.love-btn.clicked {
+    background: #ff6b6b;
+    border-color: #ff6b6b;
+    color: white;
+}
+
+.like-btn.clicked {
+    background: #51cf66;
+    border-color: #51cf66;
+    color: white;
+}
+
+.dislike-btn.clicked {
+    background: #868e96;
+    border-color: #868e96;
+    color: white;
+}
+
+.love-btn {
+    border-color: #ff6b6b;
+}
+
+.love-btn:hover {
+    background: #ff6b6b;
+    color: white;
+}
+
+.like-btn {
+    border-color: #51cf66;
+}
+
+.like-btn:hover {
+    background: #51cf66;
+    color: white;
+}
+
+.dislike-btn {
+    border-color: #868e96;
+}
+
+.dislike-btn:hover {
+    background: #868e96;
+    color: white;
+}
+
+.double-thumbs {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.single-thumb, .dislike-thumb {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* Feedback success animation */
+.feedback-btn.success {
+    animation: feedbackSuccess 0.3s ease;
+}
+
+@keyframes feedbackSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
 }
