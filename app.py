@@ -663,7 +663,7 @@ def feedback():
     search_query = data.get("search_query", "")
     search_filters = data.get("search_filters", "{}")
     
-    print(f"📝 Feedback received: URL={item_url}, Type={feedback_value}, Title={item_title}")
+    print(f"📝 Feedback received: URL={item_url}, Type={feedback_value}, Title={item_title}, Brand={item_brand}, Price={item_price}")
     
     # Convert lists/dicts to JSON strings for SQLite storage
     if isinstance(item_size, list):
@@ -728,16 +728,51 @@ def feedback():
         db = get_db()
         cursor = db.cursor()
         
-        # Store feedback (update if exists)
+        # Check for recent identical feedback submissions (within 5 seconds) to prevent spam
         cursor.execute("""
-            INSERT OR REPLACE INTO user_feedback 
-            (user_id, item_url, item_title, item_brand, item_size, item_price, 
-             item_category, item_subcategory, item_color, item_condition, item_image,
-             feedback_type, search_query, search_filters, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-        """, (user_id, item_url, item_title, item_brand, item_size, item_price,
-              item_category, item_subcategory, item_color, item_condition, item_image,
-              feedback_score, search_query, search_filters))
+            SELECT id, timestamp FROM user_feedback 
+            WHERE user_id = ? AND item_url = ? AND feedback_type = ?
+            AND timestamp > datetime('now', '-5 seconds')
+        """, (user_id, item_url, feedback_score))
+        
+        recent_duplicate = cursor.fetchone()
+        if recent_duplicate:
+            print(f"🚫 Preventing duplicate feedback submission within 5 seconds for user {user_id}")
+            if request.is_json:
+                return jsonify({"message": "Feedback already recorded", "training_info": "No duplicate processing needed"}), 200
+            else:
+                return redirect(request.referrer or "/search")
+        
+        # Check if feedback already exists for this item
+        cursor.execute("""
+            SELECT id FROM user_feedback 
+            WHERE user_id = ? AND item_url = ?
+        """, (user_id, item_url))
+        
+        existing_feedback = cursor.fetchone()
+        
+        if existing_feedback:
+            # Update existing feedback
+            cursor.execute("""
+                UPDATE user_feedback 
+                SET feedback_type = ?, timestamp = CURRENT_TIMESTAMP,
+                    item_title = ?, item_brand = ?, item_size = ?, item_price = ?,
+                    item_category = ?, item_subcategory = ?, item_color = ?, item_condition = ?, item_image = ?
+                WHERE user_id = ? AND item_url = ?
+            """, (feedback_score, item_title, item_brand, item_size, item_price,
+                  item_category, item_subcategory, item_color, item_condition, item_image,
+                  user_id, item_url))
+        else:
+            # Insert new feedback
+            cursor.execute("""
+                INSERT INTO user_feedback 
+                (user_id, item_url, item_title, item_brand, item_size, item_price, 
+                 item_category, item_subcategory, item_color, item_condition, item_image,
+                 feedback_type, search_query, search_filters, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            """, (user_id, item_url, item_title, item_brand, item_size, item_price,
+                  item_category, item_subcategory, item_color, item_condition, item_image,
+                  feedback_score, search_query, search_filters))
         
         db.commit()
         

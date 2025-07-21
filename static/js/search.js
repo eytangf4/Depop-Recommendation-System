@@ -13,6 +13,17 @@ class SearchManager {
         this.setupMobileFilters();
     }
 
+    // Simple hash function to create unique IDs from URLs
+    simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return Math.abs(hash).toString(36);
+    }
+
     setupSearchHandlers() {
         const searchForm = document.getElementById('searchForm');
         if (searchForm) {
@@ -278,10 +289,13 @@ class SearchManager {
         card.className = 'depop-card';
         card.setAttribute('data-url', item.item_url);
         
-        // Generate a unique ID for this item based on the URL (more reliable than random)
-        const itemId = 'item_' + btoa(item.item_url).replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
-        this.itemDataStore.set(itemId, item);
-        card.setAttribute('data-item-id', itemId);
+        // Generate a more robust unique ID to avoid collisions
+        // Use a combination of URL hash and timestamp for uniqueness
+        const urlHash = this.simpleHash(item.item_url);
+        const uniqueId = 'item_' + urlHash + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        console.log(`🔗 Creating item element: "${item.title}" -> ID: ${uniqueId} -> URL: ${item.item_url}`);
+        this.itemDataStore.set(uniqueId, item);
+        card.setAttribute('data-item-id', uniqueId);
 
         // Handle pricing display
         let priceHtml = '';
@@ -309,13 +323,13 @@ class SearchManager {
             </div>
             <div class="depop-actions">
                 <div class="feedback-buttons">
-                    <button class="feedback-btn love-btn" data-feedback="love" data-item-id="${itemId}" title="Love it!">
+                    <button class="feedback-btn love-btn" data-feedback="love" data-item-id="${uniqueId}" title="Love it!">
                         <span class="double-thumbs">👍👍</span>
                     </button>
-                    <button class="feedback-btn like-btn" data-feedback="like" data-item-id="${itemId}" title="Like">
+                    <button class="feedback-btn like-btn" data-feedback="like" data-item-id="${uniqueId}" title="Like">
                         <span class="single-thumb">👍</span>
                     </button>
-                    <button class="feedback-btn dislike-btn" data-feedback="dislike" data-item-id="${itemId}" title="Not interested">
+                    <button class="feedback-btn dislike-btn" data-feedback="dislike" data-item-id="${uniqueId}" title="Not interested">
                         <span class="dislike-thumb">👎</span>
                     </button>
                 </div>
@@ -436,10 +450,13 @@ class SearchManager {
         const itemData = this.itemDataStore.get(itemId);
         if (!itemData) {
             console.error('❌ Item data not found in store for ID:', itemId);
+            console.error('📍 Available IDs in store:', Array.from(this.itemDataStore.keys()));
             return;
         }
         
         console.log('📦 Retrieved item data:', itemData);
+        console.log('🔗 Item URL from data:', itemData.item_url);
+        console.log('📝 Item title from data:', itemData.title);
         
         const itemCard = btn.closest('.depop-card');
         if (!itemCard) {
@@ -485,6 +502,13 @@ class SearchManager {
 
     submitFeedback(feedback, item, btn) {
         console.log('🚀 Starting feedback submission:', feedback, item);
+        
+        // Prevent duplicate submissions
+        if (btn.dataset.submitting === 'true') {
+            console.log('🚫 Already submitting feedback for this item, ignoring duplicate request');
+            return;
+        }
+        btn.dataset.submitting = 'true';
         
         // Convert arrays to strings for database storage
         let itemSize = item.size || '';
@@ -566,9 +590,10 @@ class SearchManager {
             this.showFeedbackError('Failed to submit feedback. Please try again.');
         })
         .finally(() => {
-            // Re-enable button
+            // Re-enable button and clear submitting flag
             btn.disabled = false;
             btn.innerHTML = originalText;
+            btn.dataset.submitting = 'false';
         });
     }
 
